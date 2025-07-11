@@ -1,8 +1,0 @@
-﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:converters="clr-namespace:VideoGenerator.Utils.Converters"
-                    x:Name="Converters">
-    <converters:GestureConverter x:Key="gestureConverter"/>
-    <converters:MathConverter x:Key="math"/>
-    <BooleanToVisibilityConverter x:Key="boolToVis"/>
-
-</ResourceDictionary>

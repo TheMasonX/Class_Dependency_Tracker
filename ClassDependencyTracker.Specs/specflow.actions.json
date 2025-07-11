@@ -1,0 +1,8 @@
+﻿{
+  "windowsAppDriver": {
+    "capabilities": {
+      "app": "../../../../ClassDependencyTracker/bin/Debug/net6.0-windows/ClassDependencyTracker.exe"
+    },
+    "WindowsAppDriverPath": "C:/Program Files/Windows Application Driver/WinAppDriver.exe"
+  }
+}
