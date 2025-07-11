@@ -1,0 +1,15 @@
+Method,Job,Runtime,Number,Match,Mean,Error,StdDev,Gen0,Allocated
+IntCompareOperator,.NET 6.0,.NET 6.0,100000,10000,43.05 us,0.058 us,0.049 us,-,136 B
+StringCompareEquals,.NET 6.0,.NET 6.0,100000,10000,95.92 us,0.122 us,0.108 us,-,137 B
+StringCompareEqualsIgnoreCase,.NET 6.0,.NET 6.0,100000,10000,850.91 us,1.735 us,1.623 us,-,142 B
+StringCompareContains,.NET 6.0,.NET 6.0,100000,10000,130.03 us,0.152 us,0.142 us,-,136 B
+StringCompareContainsIgnoreCase,.NET 6.0,.NET 6.0,100000,10000,705.25 us,1.675 us,1.567 us,-,142 B
+StringCompareEndsWith,.NET 6.0,.NET 6.0,100000,10000,446.87 us,1.019 us,0.903 us,-,139 B
+StringCompareEndsWithIgnoreCase,.NET 6.0,.NET 6.0,100000,10000,464.08 us,0.926 us,0.821 us,-,139 B
+IntCompareOperator,.NET 8.0,.NET 8.0,100000,10000,28.37 us,0.036 us,0.032 us,0.0305,136 B
+StringCompareEquals,.NET 8.0,.NET 8.0,100000,10000,64.87 us,0.151 us,0.126 us,-,136 B
+StringCompareEqualsIgnoreCase,.NET 8.0,.NET 8.0,100000,10000,665.51 us,0.943 us,0.836 us,-,136 B
+StringCompareContains,.NET 8.0,.NET 8.0,100000,10000,123.54 us,0.511 us,0.399 us,-,138 B
+StringCompareContainsIgnoreCase,.NET 8.0,.NET 8.0,100000,10000,373.70 us,2.131 us,1.889 us,-,139 B
+StringCompareEndsWith,.NET 8.0,.NET 8.0,100000,10000,280.82 us,0.516 us,0.431 us,-,136 B
+StringCompareEndsWithIgnoreCase,.NET 8.0,.NET 8.0,100000,10000,283.73 us,0.507 us,0.423 us,-,136 B

@@ -1,0 +1,155 @@
+// * Summary *
+
+BenchmarkDotNet v0.13.10, Windows 10 (10.0.19045.3693/22H2/2022Update)
+AMD FX(tm)-8350, 1 CPU, 8 logical and 4 physical cores
+.NET SDK 8.0.100
+  [Host]     : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX
+  DefaultJob : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX
+
+======================================================================================================================
+Using Attribute compiled Regex variable:
+======================================================================================================================
+
+| Method                   | FileCount | Mean             | Error           | StdDev           | Gen0       | Allocated   |
+|------------------------- |---------- |-----------------:|----------------:|-----------------:|-----------:|------------:|
+| RegexMatchFiles          | 5         |         516.4 ns |         1.12 ns |          1.00 ns |     0.0114 |        48 B |
+| RegexMatchFiles_Parallel | 5         |      14,736.6 ns |       192.54 ns |        160.78 ns |     1.5259 |      6438 B |
+| RegexMatchFiles          | 10        |         975.4 ns |         7.40 ns |          6.56 ns |     0.0114 |        48 B |
+| RegexMatchFiles_Parallel | 10        |      15,915.7 ns |        59.72 ns |         49.87 ns |     1.7090 |      7220 B |
+| RegexMatchFiles          | 50        |       4,542.8 ns |         8.38 ns |          6.54 ns |     0.0076 |        48 B |
+| RegexMatchFiles_Parallel | 50        |      24,845.6 ns |       124.19 ns |        116.17 ns |     3.2959 |     13700 B |
+| RegexMatchFiles          | 100       |       9,233.5 ns |         9.34 ns |          7.80 ns |          - |        48 B |
+| RegexMatchFiles_Parallel | 100       |      39,121.4 ns |       197.90 ns |        175.43 ns |     5.0049 |     21096 B |
+| RegexMatchFiles          | 1000      |      91,788.6 ns |       183.82 ns |        153.50 ns |          - |        49 B |
+| RegexMatchFiles_Parallel | 1000      |     303,240.6 ns |       840.10 ns |        744.73 ns |    72.2656 |    299170 B |
+| RegexMatchFiles          | 100000    |   9,055,571.3 ns |    13,286.25 ns |     11,094.62 ns |          - |        54 B |
+| RegexMatchFiles_Parallel | 100000    |  29,256,301.5 ns |   185,346.10 ns |    173,372.86 ns |  7437.5000 |  30771550 B |
+| RegexMatchFiles          | 1000000   |  99,105,867.6 ns | 1,929,782.76 ns |  1,981,744.82 ns |          - |      1072 B |
+| RegexMatchFiles_Parallel | 1000000   | 290,067,560.7 ns | 5,738,998.87 ns | 13,969,516.43 ns | 66500.0000 | 275158592 B |
+  
+======================================================================================================================
+Using attribute compiled Regex method:
+======================================================================================================================
+
+| Method                   | FileCount |   Mean        |    Error     |     StdDev    |     Gen0   |   Allocated |
+|--------------------------|---------- |  ------------:|   ----------:|    ----------:|    -------:|  ----------:|
+| RegexMatchFiles          | 5         |      509.8 ns |      0.87 ns |       0.73 ns |     0.0114 |        48 B |
+| RegexMatchFiles_Parallel | 5         |   15,051.3 ns |    170.17 ns |     159.18 ns |     1.5259 |      6426 B |
+| RegexMatchFiles          | 10        |      980.5 ns |      4.87 ns |       4.55 ns |     0.0114 |        48 B |
+| RegexMatchFiles_Parallel | 10        |   15,709.2 ns |    113.85 ns |     100.93 ns |     1.7090 |      7134 B |
+| RegexMatchFiles          | 50        |    4,646.3 ns |      6.17 ns |       4.82 ns |     0.0076 |        48 B |
+| RegexMatchFiles_Parallel | 50        |   25,114.0 ns |    184.39 ns |     153.97 ns |     3.2959 |     13666 B |
+| RegexMatchFiles          | 100       |    9,332.8 ns |     17.05 ns |      15.11 ns |          - |        48 B |
+| RegexMatchFiles_Parallel | 100       |   39,688.5 ns |    203.19 ns |     169.68 ns |     5.6152 |     23191 B |
+| RegexMatchFiles          | 1000      |      94.59 us |     1.427 us |      1.752 us |          - |        49 B |
+| RegexMatchFiles_Parallel | 1000      |     295.79 us |     5.819 us |      8.157 us |    71.2891 |    295225 B |
+| RegexMatchFiles          | 100000    |  10,030.70 us |   192.553 us |    384.549 us |          - |       144 B |
+| RegexMatchFiles_Parallel | 100000    |  31,962.12 us |   251.534 us |    235.285 us |  7562.5000 |  31433098 B |
+| RegexMatchFiles          | 1000000   |  98,030.62 us | 1,923.268 us |  2,758.294 us |          - |       128 B |
+| RegexMatchFiles_Parallel | 1000000   | 286,159.51 us | 5,711.711 us | 11,406.904 us | 73000.0000 | 301759389 B |
+
+======================================================================================================================
+Using Local Regex (not compiled):
+======================================================================================================================
+
+| Method                   | FileCount | Mean           | Error         | StdDev         | Median         | Gen0        | Gen1   | Allocated   |
+|--------------------------|---------- |---------------:|--------------:|---------------:|---------------:|------------:|-------:|------------:|
+| RegexMatchFiles          | 5         |       2.388 us |     0.0477 us |      0.0669 us |       2.352 us |      0.0267 |      - |       112 B |
+| RegexMatchFiles_Parallel | 5         |      17.207 us |     0.3381 us |      0.5922 us |      17.089 us |      1.7700 |      - |      7498 B |
+| RegexMatchFiles          | 10        |       4.679 us |     0.0272 us |      0.0227 us |       4.670 us |      0.0229 |      - |       112 B |
+| RegexMatchFiles_Parallel | 10        |      20.025 us |     0.3971 us |      0.6743 us |      19.992 us |      2.6245 |      - |     10827 B |
+| RegexMatchFiles          | 50        |      24.114 us |     0.4674 us |      0.6852 us |      24.301 us |           - |      - |       112 B |
+| RegexMatchFiles_Parallel | 50        |      44.926 us |     0.8823 us |      1.1778 us |      45.285 us |      4.1504 |      - |     17403 B |
+| RegexMatchFiles          | 100       |      44.871 us |     0.8716 us |      1.4074 us |      44.427 us |           - |      - |       112 B |
+| RegexMatchFiles_Parallel | 100       |      64.151 us |     0.9302 us |      0.8701 us |      64.423 us |      7.3242 |      - |     31068 B |
+| RegexMatchFiles          | 1000      |     454.667 us |     8.5881 us |      8.0333 us |     454.836 us |           - |      - |       115 B |
+| RegexMatchFiles_Parallel | 1000      |     403.668 us |     2.0091 us |      1.5686 us |     403.394 us |    126.9531 | 2.9297 |    516938 B |
+| RegexMatchFiles          | 100000    |  48,873.465 us |   945.2539 us |  1,229.0971 us |  49,319.810 us |           - |      - |       152 B |
+| RegexMatchFiles_Parallel | 100000    |  46,451.285 us |   248.7798 us |    232.7088 us |  46,455.655 us |  14727.2727 |      - |  59559031 B |
+| RegexMatchFiles          | 1000000   | 474,874.692 us | 9,481.2165 us | 26,896.6330 us | 470,073.400 us |           - |      - |       512 B |
+| RegexMatchFiles_Parallel | 1000000   | 468,218.265 us | 9,097.9286 us |  9,342.9028 us | 466,047.800 us | 159000.0000 |      - | 643091944 B |
+
+======================================================================================================================
+Using Regex static IsMatch method with public string expression:
+======================================================================================================================
+
+| Method                   | FileCount | Mean           | Error         | StdDev         | Median         | Gen0        | Allocated   |
+|------------------------- |---------- |---------------:|--------------:|---------------:|---------------:|------------:|------------:|
+| RegexMatchFiles          | 5         |       2.307 us |     0.0135 us |      0.0126 us |       2.305 us |      0.0267 |       112 B |
+| RegexMatchFiles_Parallel | 5         |      14.852 us |     0.1765 us |      0.1474 us |      14.906 us |      1.8311 |      7722 B |
+| RegexMatchFiles          | 10        |       4.500 us |     0.0657 us |      0.0615 us |       4.504 us |      0.0229 |       112 B |
+| RegexMatchFiles_Parallel | 10        |      16.678 us |     0.1653 us |      0.1465 us |      16.633 us |      2.8076 |     11623 B |
+| RegexMatchFiles          | 50        |      22.334 us |     0.4104 us |      0.3839 us |      22.372 us |           - |       112 B |
+| RegexMatchFiles_Parallel | 50        |      36.505 us |     0.7166 us |      1.2551 us |      36.830 us |      7.3242 |     30354 B |
+| RegexMatchFiles          | 100       |      42.919 us |     0.6021 us |      0.8826 us |      42.770 us |           - |       112 B |
+| RegexMatchFiles_Parallel | 100       |      62.085 us |     1.2111 us |      1.1894 us |      61.998 us |      8.3008 |     34935 B |
+| RegexMatchFiles          | 1000      |     449.613 us |     4.6605 us |      4.3594 us |     449.878 us |           - |       112 B |
+| RegexMatchFiles_Parallel | 1000      |     369.022 us |     1.2321 us |      1.1525 us |     368.682 us |    141.6016 |    573881 B |
+| RegexMatchFiles          | 100000    |  45,149.213 us |   651.1736 us |    609.1082 us |  45,315.700 us |           - |       152 B |
+| RegexMatchFiles_Parallel | 100000    |  38,945.414 us |    96.1377 us |     89.9273 us |  38,971.675 us |  16500.0000 |  66620185 B |
+| RegexMatchFiles          | 1000000   | 450,393.533 us | 4,660.3041 us |  4,359.2513 us | 450,463.900 us |           - |       512 B |
+| RegexMatchFiles_Parallel | 1000000   | 408,526.693 us | 9,948.7650 us | 29,334.1582 us | 430,127.850 us | 147000.0000 | 593744008 B |
+
+======================================================================================================================
+Using Regex.IsMatch() with public static string expression:
+======================================================================================================================
+
+| Method                   | FileCount | Mean           | Error         | StdDev         | Gen0        | Allocated   |
+|------------------------- |---------- |---------------:|--------------:|---------------:|------------:|------------:|
+| RegexMatchFiles          | 5         |       2.281 us |     0.0216 us |      0.0191 us |      0.0114 |        48 B |
+| RegexMatchFiles_Parallel | 5         |      17.684 us |     0.3517 us |      0.5370 us |      1.7090 |      7407 B |
+| RegexMatchFiles          | 10        |       4.645 us |     0.0117 us |      0.0110 us |      0.0076 |        48 B |
+| RegexMatchFiles_Parallel | 10        |      19.109 us |     0.1344 us |      0.1257 us |      2.4414 |     10478 B |
+| RegexMatchFiles          | 50        |      22.596 us |     0.0396 us |      0.0330 us |           - |        48 B |
+| RegexMatchFiles_Parallel | 50        |      44.566 us |     0.2952 us |      0.2761 us |      4.2725 |     17576 B |
+| RegexMatchFiles          | 100       |      46.208 us |     0.2904 us |      0.2716 us |           - |        48 B |
+| RegexMatchFiles_Parallel | 100       |      67.673 us |     0.5687 us |      0.5320 us |      8.0566 |     33383 B |
+| RegexMatchFiles          | 1000      |     454.034 us |     3.8774 us |      3.4372 us |           - |        51 B |
+| RegexMatchFiles_Parallel | 1000      |     416.498 us |     8.3014 us |      7.7652 us |    138.6719 |    561691 B |
+| RegexMatchFiles          | 100000    |  48,633.216 us |   469.2892 us |    366.3901 us |           - |        88 B |
+| RegexMatchFiles_Parallel | 100000    |  44,902.433 us |    90.7906 us |     75.8142 us |  16666.6667 |  67594095 B |
+| RegexMatchFiles          | 1000000   | 484,146.305 us | 9,378.6653 us | 15,925.6854 us |           - |       448 B |
+| RegexMatchFiles_Parallel | 1000000   | 362,385.853 us | 1,341.4599 us |  1,254.8024 us | 161000.0000 | 652472328 B |
+
+
+======================================================================================================================
+Using Regex.IsMatch() with public volatile string expression:
+======================================================================================================================
+
+| Method                   | FileCount | Mean           | Error         | StdDev        | Gen0        | Allocated   |
+|------------------------- |---------- |---------------:|--------------:|--------------:|------------:|------------:|
+| RegexMatchFiles          | 5         |       2.511 us |     0.0185 us |     0.0164 us |      0.0267 |       112 B |
+| RegexMatchFiles_Parallel | 5         |      16.854 us |     0.2290 us |     0.2142 us |      1.5869 |      7074 B |
+| RegexMatchFiles          | 10        |       4.664 us |     0.0233 us |     0.0218 us |      0.0229 |       112 B |
+| RegexMatchFiles_Parallel | 10        |      19.302 us |     0.1809 us |     0.1604 us |      2.4414 |     10457 B |
+| RegexMatchFiles          | 50        |      24.429 us |     0.1149 us |     0.1018 us |           - |       112 B |
+| RegexMatchFiles_Parallel | 50        |      45.484 us |     0.3427 us |     0.3206 us |      4.0283 |     17042 B |
+| RegexMatchFiles          | 100       |      45.940 us |     0.1798 us |     0.1593 us |           - |       112 B |
+| RegexMatchFiles_Parallel | 100       |      67.217 us |     0.3835 us |     0.3588 us |      8.5449 |     35457 B |
+| RegexMatchFiles          | 1000      |     436.862 us |     1.6871 us |     1.5781 us |           - |       115 B |
+| RegexMatchFiles_Parallel | 1000      |     464.700 us |     1.4809 us |     1.3852 us |    148.4375 |    601270 B |
+| RegexMatchFiles          | 100000    |  46,035.211 us |   315.9517 us |   280.0830 us |           - |       671 B |
+| RegexMatchFiles_Parallel | 100000    |  39,393.731 us |    78.5844 us |    61.3535 us |  16538.4615 |  67081933 B |
+| RegexMatchFiles          | 1000000   | 476,945.086 us | 2,838.2115 us | 2,516.0006 us |           - |      6256 B |
+| RegexMatchFiles_Parallel | 1000000   | 396,548.980 us | 1,432.4599 us | 1,339.9239 us | 158000.0000 | 639954392 B |
+
+======================================================================================================================
+Using Regex.IsMatch() with literal string expression:
+======================================================================================================================
+
+| Method                   | FileCount | Mean           | Error         | StdDev         | Gen0        | Allocated   |
+|------------------------- |---------- |---------------:|--------------:|---------------:|------------:|------------:|
+| RegexMatchFiles          | 5         |       2.309 us |     0.0266 us |      0.0249 us |      0.0114 |        48 B |
+| RegexMatchFiles_Parallel | 5         |      14.930 us |     0.2976 us |      0.2923 us |      1.8311 |      7862 B |
+| RegexMatchFiles          | 10        |       4.461 us |     0.0271 us |      0.0240 us |      0.0076 |        48 B |
+| RegexMatchFiles_Parallel | 10        |      16.720 us |     0.1602 us |      0.1420 us |      2.8076 |     11790 B |
+| RegexMatchFiles          | 50        |      22.486 us |     0.2930 us |      0.2741 us |           - |        48 B |
+| RegexMatchFiles_Parallel | 50        |      46.851 us |     0.9192 us |      0.8598 us |      3.2959 |     13935 B |
+| RegexMatchFiles          | 100       |      44.967 us |     0.5548 us |      0.5190 us |           - |        48 B |
+| RegexMatchFiles_Parallel | 100       |      65.136 us |     0.5430 us |      0.4813 us |      8.0566 |     34180 B |
+| RegexMatchFiles          | 1000      |     450.710 us |     2.5397 us |      2.1208 us |           - |        48 B |
+| RegexMatchFiles_Parallel | 1000      |     455.231 us |     1.4813 us |      1.3856 us |    151.3672 |    611640 B |
+| RegexMatchFiles          | 100000    |  45,636.405 us |   712.5256 us |    666.4969 us |           - |        84 B |
+| RegexMatchFiles_Parallel | 100000    |  41,126.296 us |   821.5648 us |  1,254.6162 us |  15250.0000 |  61866521 B |
+| RegexMatchFiles          | 1000000   | 475,781.987 us | 9,388.0028 us |  9,220.2741 us |           - |       448 B |
+| RegexMatchFiles_Parallel | 1000000   | 432,072.085 us | 8,587.9181 us | 15,485.7878 us | 158000.0000 | 641339416 B |

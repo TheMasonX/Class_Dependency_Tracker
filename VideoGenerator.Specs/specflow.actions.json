@@ -1,0 +1,8 @@
+﻿{
+  "windowsAppDriver": {
+    "capabilities": {
+      "app": "../../../../VideoGenerator/bin/Debug/net6.0-windows/VideoGenerator.exe"
+    },
+    "WindowsAppDriverPath": "C:/Program Files/Windows Application Driver/WinAppDriver.exe"
+  }
+}

@@ -1,0 +1,47 @@
+// * Summary *
+
+BenchmarkDotNet v0.13.10, Windows 10 (10.0.19045.3693/22H2/2022Update)
+AMD FX(tm)-8350, 1 CPU, 8 logical and 4 physical cores
+.NET SDK 8.0.100
+  [Host]     : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX
+  DefaultJob : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX
+  
+30 Files
+
+| Method                  | Mean       | Error    | StdDev   | Allocated |
+|------------------------ |-----------:|---------:|---------:|----------:|
+| GetImagesInDir          | 1,382.5 ms | 14.34 ms | 11.97 ms |  39.08 KB |
+| GetImagesInDir_Parallel |   249.6 ms |  4.53 ms |  4.01 ms |  33.12 KB |
+
+
+| Method                  | FileCount | Mean        | Error     | StdDev     | Median      | Allocated |
+|------------------------ |---------- |------------:|----------:|-----------:|------------:|----------:|
+| GetImagesInDir          | 5         |   239.16 ms |  4.386 ms |   7.909 ms |   237.06 ms |   6.62 KB |
+| GetImagesInDir_Parallel | 5         |    60.09 ms |  1.181 ms |   1.535 ms |    60.35 ms |  10.51 KB |
+| GetImagesInDir          | 10        |   466.44 ms |  7.363 ms |   6.887 ms |   465.26 ms |  15.19 KB |
+| GetImagesInDir_Parallel | 10        |   131.13 ms |  2.603 ms |   6.286 ms |   130.40 ms |  15.76 KB |
+| GetImagesInDir          | 50        | 2,404.18 ms | 47.975 ms |  57.111 ms | 2,390.86 ms |  62.97 KB |
+| GetImagesInDir_Parallel | 50        |   500.93 ms | 11.046 ms |  32.569 ms |   500.11 ms |  51.73 KB |
+| GetImagesInDir          | 100       | 4,730.33 ms | 83.737 ms | 135.219 ms | 4,661.84 ms | 119.89 KB |
+| GetImagesInDir_Parallel | 100       |   992.87 ms | 20.779 ms |  61.267 ms |   997.64 ms | 103.05 KB |
+
+// * Hints *
+Outliers
+  Benchmarks.GetImagesInDir: Default          -> 4 outliers were removed (264.59 ms..286.75 ms)
+  Benchmarks.GetImagesInDir_Parallel: Default -> 2 outliers were removed (150.41 ms, 150.56 ms)
+  Benchmarks.GetImagesInDir: Default          -> 1 outlier  was  removed (5.18 s)
+
+// * Legends *
+  FileCount : Value of the 'FileCount' parameter
+  Mean      : Arithmetic mean of all measurements
+  Error     : Half of 99.9% confidence interval
+  StdDev    : Standard deviation of all measurements
+  Median    : Value separating the higher half of all measurements (50th percentile)
+  Allocated : Allocated memory per single operation (managed only, inclusive, 1KB = 1024B)
+  1 ms      : 1 Millisecond (0.001 sec)
+
+// * Diagnostic Output - MemoryDiagnoser *
+
+
+// ***** BenchmarkRunner: End *****
+Run time: 00:11:05 (665.74 sec), executed benchmarks: 8
