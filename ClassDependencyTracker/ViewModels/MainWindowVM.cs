@@ -1,8 +1,5 @@
-﻿using System;
-using System.IO;
-using System.Linq;
+﻿using System.IO;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -12,8 +9,6 @@ using Microsoft.Win32;
 using ClassDependencyTracker.Models;
 using ClassDependencyTracker.Properties;
 using ClassDependencyTracker.Utils.Extensions;
-using System.Diagnostics;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using ClassDependencyTracker.Models.DB;
 
@@ -107,24 +102,29 @@ public partial class MainWindowVM : ObservableObject, IDisposable
 
     public void OpenWith()
     {
-        string? file = Environment.GetCommandLineArgs().FirstOrDefault(FileExtensionRegex().IsMatch);
-        if (file is not null && File.Exists(file))
-            Task.Run(() => OpenFile(file));
+        string? filePath = Environment.GetCommandLineArgs().FirstOrDefault(FileExtensionRegex().IsMatch);
+        if (filePath is not null && File.Exists(filePath))
+            Task.Run(() => OpenFile(filePath));
         else if (Settings.Default.LoadLast && File.Exists(Settings.Default.LastInputFile))
             OpenFile(Settings.Default.LastInputFile);
     }
 
-    public void OpenFile(string filename)
+    public void OpenFile(string filePath)
     {
-        Settings.Default.LastInputFile = filename;
+        Settings.Default.LastInputFile = filePath;
         Settings.Default.Save();
 
-        ClassModel[] classes = DBUtils.LoadFromFile(filename);
+        Status = new TextStatus($"Opening Database file: {filePath}");
+        ClassModel[] classes = DBUtils.LoadFromFile(filePath);
         Classes.SafeClear();
         foreach (ClassModel cls in classes)
         {
             Classes.SafeAdd(cls);
         }
+        if (classes.Length > 0)
+            Status = TextStatus.Success($"Loaded {classes.Length} classes from database file: {filePath}");
+        else
+            TextStatus.Error($"Didn't load any classes from database file: {filePath}. See log for details.");
     }
 
     #endregion Open
@@ -172,8 +172,14 @@ public partial class MainWindowVM : ObservableObject, IDisposable
 
     private void SaveToFile(string filePath)
     {
+        Status = new TextStatus($"Saving to the database file {filePath}");
         DBUtils.CreateDB(filePath);
-        DBUtils.SaveToFile(filePath, Classes.ToArray());
+        ClassModel[] classes = Classes.ToArray();
+        bool success = DBUtils.TrySaveToFile(filePath, classes);
+        if (success)
+            Status = TextStatus.Success($"Saved {classes.Length} classes to the database file: {filePath}");
+        else
+            Status = TextStatus.Error($"Error saving to the database file: {filePath}. See log for details.");
     }
 
     #endregion Public Methods

@@ -18,6 +18,7 @@ public static class DBUtils
         	"Name"	TEXT NOT NULL,
         	"URL"	TEXT,
         	"Credits"	INTEGER NOT NULL DEFAULT 0,
+            "Semester"	INTEGER NOT NULL DEFAULT 0,
         	PRIMARY KEY("ID" AUTOINCREMENT)
         );
         CREATE TABLE IF NOT EXISTS "Dependencies" (
@@ -58,17 +59,20 @@ public static class DBUtils
         }
 
         string connectionString = SQLExtensions.GetConnectionString(filePath);
-        int changes = SQLExtensions.ExecuteNonQuery(connectionString, DBSchema);
+        int? changes = SQLExtensions.ExecuteNonQuery(connectionString, DBSchema);
         Log.Logger.Information("Executed the DBSchema command with {Changes} changes to {FilePath}", changes, filePath);
     }
 
-    public static void SaveToFile(string filePath, ClassModel[] classes)
+    public static bool TrySaveToFile(string filePath, ClassModel[] classes)
     {
+        bool result = true;
+
         //Save the classes to the DB so we can get the DB IDs
         IEnumerable<DBClassModel> dbClasses = classes.Select(x => x.ToDBModel());
         if (!DBClassModel.Save(filePath, dbClasses))
         {
             Log.Logger.Error("Error saving classes to {FilePath}", filePath);
+            result = false;
         }
 
         List <(ClassModel model, DBClassModel dbModel)> pairs = [];
@@ -85,7 +89,10 @@ public static class DBUtils
         if (!DBDependencyModel.Save(filePath, dependencyModels))
         {
             Log.Logger.Error("Error saving dependencies to {FilePath}", filePath);
+            result = false;
         }
+
+        return result;
     }
 
     public static ClassModel[] LoadFromFile(string filePath)
@@ -94,7 +101,6 @@ public static class DBUtils
         ClassModel[] classes = dbClasses.Select(ClassModel.ParseDBModel).ToArray();
         List<DBDependencyModel> dbDependencies = DBDependencyModel.Read(filePath);
         IEnumerable<DependencyModel> dependencies = dbDependencies.Select(x => DependencyModel.ParseDBModel(x, classes)).Where(x => x is not null)!;
-
 
         foreach (DependencyModel dependencyModel in dependencies)
         {

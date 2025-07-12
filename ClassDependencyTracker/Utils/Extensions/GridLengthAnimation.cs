@@ -29,7 +29,7 @@ internal class GridLengthAnimation : AnimationTimeline
         }
     }
 
-    protected override System.Windows.Freezable CreateInstanceCore ()
+    protected override Freezable CreateInstanceCore ()
     {
         return new GridLengthAnimation();
     }
@@ -39,11 +39,11 @@ internal class GridLengthAnimation : AnimationTimeline
     {
         get
         {
-            return (GridLength)GetValue(GridLengthAnimation.FromProperty);
+            return (GridLength)GetValue(FromProperty);
         }
         set
         {
-            SetValue(GridLengthAnimation.FromProperty, value);
+            SetValue(FromProperty, value);
         }
     }
 
@@ -52,11 +52,11 @@ internal class GridLengthAnimation : AnimationTimeline
     {
         get
         {
-            return (GridLength)GetValue(GridLengthAnimation.ToProperty);
+            return (GridLength)GetValue(ToProperty);
         }
         set
         {
-            SetValue(GridLengthAnimation.ToProperty, value);
+            SetValue(ToProperty, value);
         }
     }
 
@@ -65,11 +65,11 @@ internal class GridLengthAnimation : AnimationTimeline
     {
         get
         {
-            return (GridUnitType)GetValue(GridLengthAnimation.UnitProperty);
+            return (GridUnitType)GetValue(UnitProperty);
         }
         set
         {
-            SetValue(GridLengthAnimation.UnitProperty, value);
+            SetValue(UnitProperty, value);
         }
     }
 
@@ -78,23 +78,23 @@ internal class GridLengthAnimation : AnimationTimeline
     {
         get
         {
-            return (IEasingFunction?)GetValue(GridLengthAnimation.EasingFunctionProperty);
+            return (IEasingFunction?)GetValue(EasingFunctionProperty);
         }
         set
         {
-            SetValue(GridLengthAnimation.EasingFunctionProperty, value);
+            SetValue(EasingFunctionProperty, value);
         }
     }
 
     public override object GetCurrentValue (object defaultOriginValue,
         object defaultDestinationValue, AnimationClock animationClock)
     {
-        double fromVal = ((GridLength)GetValue(GridLengthAnimation.FromProperty)).Value;
-        double toVal = ((GridLength)GetValue(GridLengthAnimation.ToProperty)).Value;
+        double fromVal = ((GridLength)GetValue(FromProperty)).Value;
+        double toVal = ((GridLength)GetValue(ToProperty)).Value;
         double percent = animationClock.CurrentProgress!.Value;
 
-        GridUnitType unitVal = (GridUnitType)GetValue(GridLengthAnimation.UnitProperty);
-        IEasingFunction? easingFunctionVal = (IEasingFunction)GetValue(GridLengthAnimation.EasingFunctionProperty);
+        GridUnitType unitVal = (GridUnitType)GetValue(UnitProperty);
+        IEasingFunction? easingFunctionVal = (IEasingFunction)GetValue(EasingFunctionProperty);
         if (easingFunctionVal is not null)
         {
             percent = easingFunctionVal.Ease(percent);

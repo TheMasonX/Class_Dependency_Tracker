@@ -10,17 +10,25 @@ using Serilog;
 
 namespace ClassDependencyTracker.Models.DB;
 
+[Flags]
+public enum Semester
+{
+    Unknown = 0x0,
+    Spring  = 0x1,
+    Summer  = 0x2,
+    Fall    = 0x4,
+    Any     = 0xF,
+}
+
 public class DBClassModel
 {
     #region Properties
 
     public int? ID { get; set; }
-
     public string Name { get; set; } = "";
-
     public string? URL { get; set; }
-
     public int Credits { get; set; }
+    public Semester Semester { get; set; }
 
     #endregion Properties
 
@@ -28,7 +36,7 @@ public class DBClassModel
     {
         string id = ID.HasValue ? ID.Value.ToString() : "NULL";
         string url = !URL.IsNullOrEmpty() ? $"\"{URL}\"" : "NULL";
-        return $"({id}, \"{Name}\", {url}, {Credits})";
+        return $"({id}, \"{Name}\", {url}, {Credits}, {(int)Semester})";
     }
 
     #region Static Methods
@@ -60,6 +68,7 @@ public class DBClassModel
                 Name = reader.GetString(1),
                 URL = reader.SafeGetString(2),
                 Credits = reader.SafeGetInt(3, 0).Value,
+                Semester = (Semester)reader.SafeGetInt(4, 0).Value,
             };
             return true;
         }
@@ -75,10 +84,10 @@ public class DBClassModel
     {
         string connectionString = SQLExtensions.GetConnectionString(filePath);
         StringBuilder sb = new StringBuilder();
-        sb.AppendLine("Insert into Classes (ID, Name, URL, Credits) Values");
+        sb.AppendLine("Insert into Classes (ID, Name, URL, Credits, Semester) Values");
 
         sb.AppendJoin(",\n", classes);
-        int changes = SQLExtensions.ExecuteNonQuery(connectionString, sb.ToString());
+        int? changes = SQLExtensions.ExecuteNonQuery(connectionString, sb.ToString());
         Log.Logger.Information("Saved {ClassCount} classes to {FilePath} with {Changes} changes", classes.Count(), filePath, changes);
 
         return changes == classes.Count();

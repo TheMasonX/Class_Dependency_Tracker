@@ -33,3 +33,8 @@ public class InvertedBoolConverter() : BooleanConverter<bool>(false, true)
 
 public class BoolToBrushConverter() : BooleanConverter<Brush>(Brushes.Green, Brushes.Red)
 { }
+
+public class BoolToGridLengthConverter() : BooleanConverter<GridLength>(GridLength.Auto, new GridLength(0))
+{
+
+}

@@ -110,7 +110,7 @@ public class DBTests
 
         ClassModel[] classes =
         [
-            new ClassModel("Class 1") { URL = new Uri("www.college.com"), Credits = 2 },
+            new ClassModel("Class 1") { URL ="www.college.com", Credits = 2 },
             new ClassModel("Other Class") { Credits = 3 },
             new ClassModel("Hard Class") { Credits = 4 },
         ];
@@ -126,7 +126,7 @@ public class DBTests
         classes[2].AddRequirement(classes[0]);
         classes[2].AddRequirement(classes[1]);
 
-        DBUtils.SaveToFile(TempFile, classes);
+        DBUtils.TrySaveToFile(TempFile, classes);
         List<DBClassModel> dbClasses = DBClassModel.Read(TempFile);
         List<DBDependencyModel> dbDependencies = DBDependencyModel.Read(TempFile);
 

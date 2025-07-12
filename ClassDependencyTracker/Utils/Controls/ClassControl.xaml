@@ -4,20 +4,28 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:ClassDependencyTracker.Views"
-             xmlns:models="clr-namespace:ClassDependencyTracker.Models" xmlns:classes="clr-namespace:ClassDependencyTracker.Utils.Classes" xmlns:controls="clr-namespace:ClassDependencyTracker.Utils.Controls"
+             xmlns:models="clr-namespace:ClassDependencyTracker.Models" xmlns:classes="clr-namespace:ClassDependencyTracker.Utils.Classes" xmlns:controls="clr-namespace:ClassDependencyTracker.Utils.Controls" xmlns:converters="clr-namespace:ClassDependencyTracker.Utils.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="200" d:DesignWidth="300">
     <d:UserControl.DataContext>
         <models:ClassModel/>
     </d:UserControl.DataContext>
+    <UserControl.Resources>
+        <converters:BoolToGridLengthConverter x:Key="boolToGridLength" True="Auto" False="0"/>
+    </UserControl.Resources>
+    
     <Border Background="WhiteSmoke" HorizontalAlignment="Stretch">
         <Grid Margin="2">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="{Binding IsExpanded, Converter={StaticResource boolToGridLength}}" d:Height="Auto"/>
+                <RowDefinition Height="{Binding IsExpanded, Converter={StaticResource boolToGridLength}}" d:Height="Auto"/>
+                <RowDefinition Height="{Binding IsExpanded, Converter={StaticResource boolToGridLength}}" d:Height="Auto"/>
+                <RowDefinition Height="{Binding IsExpanded, Converter={StaticResource boolToGridLength}}" d:Height="Auto"/>
+                <RowDefinition Height="{Binding IsExpanded, Converter={StaticResource boolToGridLength}}" d:Height="Auto"/>
+                <RowDefinition Height="{Binding IsExpanded, Converter={StaticResource boolToGridLength}}" d:Height="Auto"/>
+                <RowDefinition Height="{Binding IsExpanded, Converter={StaticResource boolToGridLength}}" d:Height="Auto"/>
             </Grid.RowDefinitions>
 
             <Grid.ColumnDefinitions>
@@ -25,9 +33,11 @@
                 <ColumnDefinition Width="3*"/>
             </Grid.ColumnDefinitions>
 
-             <!--Name-->
-            <Label Grid.Row="0" Grid.Column="0" Content="_Name:"/>
-            <Grid Grid.Row="0" Grid.Column="1">
+            <Expander IsExpanded="{Binding IsExpanded}"/>
+            
+            <!--Name-->
+            <Label Grid.Row="1" Grid.Column="0" Content="_Name:"/>
+            <Grid Grid.Row="1" Grid.Column="1">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*"/>
                     <ColumnDefinition Width="Auto"/>
@@ -37,14 +47,29 @@
             </Grid>
 
             <!--URL-->
-            <Label Grid.Row="1" Grid.Column="0" Content="_URL:"/>
-            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding URL, UpdateSourceTrigger=PropertyChanged}"/>
+            <Label Grid.Row="2" Grid.Column="0" Content="_URL:"/>
+            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding URL, UpdateSourceTrigger=PropertyChanged}"/>
 
-            <Label Grid.Row="2" Grid.Column="0" Content="_Credits:"/>
-            <controls:NumericBox Grid.Row="2" Grid.Column="1" Text="{Binding Credits, UpdateSourceTrigger=PropertyChanged}" IsFloat="False" MaxLength="1" HorizontalAlignment="Left" HorizontalContentAlignment="Center"/>
+            <!--Credits-->
+            <Label Grid.Row="3" Grid.Column="0" Content="_Credits:"/>
+            <controls:NumericBox Grid.Row="3" Grid.Column="1" Text="{Binding Credits, UpdateSourceTrigger=PropertyChanged}" IsFloat="False" MaxLength="1" HorizontalAlignment="Left" HorizontalContentAlignment="Center"/>
 
+            <!-- Semester -->
+            <Label Grid.Row="4" Grid.Column="0" Content="_Offered:"/>
+            <Grid Grid.Row="4" Grid.Column="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <CheckBox Grid.Column="0" Content="S_pring" IsChecked="{Binding Spring}"/>
+                <CheckBox Grid.Column="1" Content="S_ummer" IsChecked="{Binding Summer}"/>
+                <CheckBox Grid.Column="2" Content="_Fall" IsChecked="{Binding Fall}"/>
+            </Grid>
+            
             <!--Prereqs-->
-            <Grid Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Name="prereqs">
+            <Grid Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" Name="prereqs">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="1*"/>

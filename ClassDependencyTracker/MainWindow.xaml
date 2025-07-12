@@ -123,8 +123,8 @@
         <!--#endregion ============== Body ============== -->
 
         <!--#region    ============== Status Bar ============== -->
-        <Grid Grid.Row="2" x:Name="statusBarGrid">
-            <ProgressBar x:Name="statusProgress" Minimum="0" Maximum="1" Value="{Binding Status.ProgressPercent, FallbackValue=0}"  VerticalAlignment="Stretch"/>
+        <Grid Grid.Row="2" x:Name="statusBarGrid"  Background="{Binding Status.BGColor}">
+            <ProgressBar x:Name="statusProgress" Minimum="0" Maximum="1" Value="{Binding Status.ProgressPercent, FallbackValue=0}" Visibility="{Binding Status.ShowProgress, Converter={StaticResource boolToVis}}"  VerticalAlignment="Stretch"/>
             <TextBlock x:Name="statusText" Text="{Binding Status.Status}" Foreground="{Binding Status.TextColor}" FontWeight="Bold" HorizontalAlignment="Center" TextAlignment="Center" VerticalAlignment="Top">
             </TextBlock>
         </Grid>

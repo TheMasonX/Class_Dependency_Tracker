@@ -59,6 +59,40 @@ public partial class ClassModel : ObservableRecipient, IDisposable
     [ObservableProperty]
     private int _credits;
 
+    #region Semester
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Spring), nameof(Summer), nameof(Fall))]
+    private Semester _semester;
+
+    public bool Spring
+    {
+        get => Semester.HasFlag(Semester.Spring);
+        set => SetSemesterFlag(Semester.Spring, value);
+    }
+
+    public bool Summer
+    {
+        get => Semester.HasFlag(Semester.Summer);
+        set => SetSemesterFlag(Semester.Summer, value);
+    }
+
+    public bool Fall
+    {
+        get => Semester.HasFlag(Semester.Fall);
+        set => SetSemesterFlag(Semester.Fall, value);
+    }
+
+    private void SetSemesterFlag(Semester semester, bool value)
+    {
+        if (value)
+            Semester |= semester;
+        else
+            Semester &= ~semester;
+    }
+
+    #endregion Semester
+
     [ObservableProperty]
     private ObservableCollection<DependencyModel> _requirements = null!;
     partial void OnRequirementsChanged(ObservableCollection<DependencyModel> value)
@@ -68,6 +102,9 @@ public partial class ClassModel : ObservableRecipient, IDisposable
 
     [ObservableProperty]
     private bool _isValid;
+
+    [ObservableProperty]
+    private bool _isExpanded;
 
     public bool AnyRequirements => Requirements.Count > 0;
     public bool CanAdd => Requirements.Count < (AllClasses.Count - 1);
@@ -121,6 +158,7 @@ public partial class ClassModel : ObservableRecipient, IDisposable
             Name = dbModel.Name,
             URL = dbModel.URL,
             Credits = dbModel.Credits,
+            Semester = dbModel.Semester,
         };
     }
 
@@ -132,6 +170,7 @@ public partial class ClassModel : ObservableRecipient, IDisposable
             Name = Name,
             URL = URL,
             Credits = Credits,
+            Semester = Semester,
         };
     }
 

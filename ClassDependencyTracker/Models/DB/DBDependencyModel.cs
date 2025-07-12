@@ -65,12 +65,15 @@ public class DBDependencyModel
 
     public static bool Save(string filePath, IEnumerable<DBDependencyModel> requirements)
     {
+        if (!requirements.Any()) //Valid to save without any requirements
+            return true;
+
         string connectionString = SQLExtensions.GetConnectionString(filePath);
         StringBuilder sb = new StringBuilder();
         sb.AppendLine("Insert into Dependencies (ID, SourceID, RequiredID) Values");
 
         sb.AppendJoin(",\n", requirements);
-        int changes = SQLExtensions.ExecuteNonQuery(connectionString, sb.ToString());
+        int? changes = SQLExtensions.ExecuteNonQuery(connectionString, sb.ToString());
         return changes == requirements.Count();
     }
 
