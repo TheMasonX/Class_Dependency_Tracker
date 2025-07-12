@@ -28,7 +28,7 @@ public class DBDependencyModel
 
     #region Static Methods
 
-    public static List<DBDependencyModel> ReadDependencies(string filePath)
+    public static List<DBDependencyModel> Read(string filePath)
     {
         List<DBDependencyModel> dependencies = [];
 
@@ -63,7 +63,7 @@ public class DBDependencyModel
         }
     }
 
-    public static bool SaveDependencies(string filePath, IEnumerable<DBDependencyModel> requirements)
+    public static bool Save(string filePath, IEnumerable<DBDependencyModel> requirements)
     {
         string connectionString = SQLExtensions.GetConnectionString(filePath);
         StringBuilder sb = new StringBuilder();

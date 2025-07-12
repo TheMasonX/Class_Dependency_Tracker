@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:ClassDependencyTracker.Views"
-             xmlns:models="clr-namespace:ClassDependencyTracker.Models" xmlns:classes="clr-namespace:ClassDependencyTracker.Utils.Classes"
+             xmlns:models="clr-namespace:ClassDependencyTracker.Models" xmlns:classes="clr-namespace:ClassDependencyTracker.Utils.Classes" xmlns:controls="clr-namespace:ClassDependencyTracker.Utils.Controls"
              mc:Ignorable="d" 
              d:DesignHeight="200" d:DesignWidth="300">
     <d:UserControl.DataContext>
@@ -32,17 +32,19 @@
                     <ColumnDefinition Width="1*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <TextBox Text="{Binding Name}"/>
+                <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>
                 <Button Grid.Column="1" Content="{StaticResource X}" ToolTip="Delete this class" Style="{StaticResource singleCharButton}" Command="{Binding DeleteCommand}"/>
             </Grid>
 
             <!--URL-->
             <Label Grid.Row="1" Grid.Column="0" Content="_URL:"/>
-            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding URL}"/>
+            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding URL, UpdateSourceTrigger=PropertyChanged}"/>
+
+            <Label Grid.Row="2" Grid.Column="0" Content="_Credits:"/>
+            <controls:NumericBox Grid.Row="2" Grid.Column="1" Text="{Binding Credits, UpdateSourceTrigger=PropertyChanged}" IsFloat="False" MaxLength="1" HorizontalAlignment="Left" HorizontalContentAlignment="Center"/>
 
             <!--Prereqs-->
-            <Label Grid.Row="2" Grid.Column="0" Content="_Prereqs:"/>
-            <Grid Grid.Row="2" Grid.Column="1" Name="prereqs">
+            <Grid Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Name="prereqs">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="1*"/>
@@ -54,14 +56,14 @@
                         <ColumnDefinition Width="1*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-
+                    
+                    <Label Grid.Column="0" Content="_Prereqs:"/>
                     <Button Grid.Column="1" Content="{StaticResource +}" ToolTip="Add a prerequesite" Command="{Binding AddRequirementCommand}" IsEnabled="{Binding CanAdd}" Style="{StaticResource singleCharButton}"/>
                 </Grid>
 
                 <!-- Class List -->
-                <ListView Grid.Row="1" ItemsSource="{Binding Requirements}" d:ItemsSource="{d:SampleData ItemCount=2}">
+                <ListView Grid.Row="1" ItemsSource="{Binding Requirements}" Visibility="{Binding AnyRequirements, Converter={StaticResource boolToVis}}">
                     <ListView.Resources>
-                        <classes:BindingProxy x:Key="otherClasses" Data="{Binding AllOtherClasses}"/>
                         <classes:BindingProxy x:Key="deleteClassCommand" Data="{Binding DeleteRequirementCommand}"/>
                     </ListView.Resources>
                     <ListView.ItemTemplate>

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Windows.Input;
 
 using ClassDependencyTracker.Messages;
+using ClassDependencyTracker.Models.DB;
 using ClassDependencyTracker.Utils.Classes;
 using ClassDependencyTracker.Utils.Extensions;
 using ClassDependencyTracker.ViewModels;
@@ -35,9 +36,7 @@ public partial class ClassModel : ObservableRecipient, IDisposable
 
     private void OnClassedUpdated(object recipient, ClassesUpdatedMsg message)
     {
-        RemoveInvalidRequirements();
-        OnPropertyChanged(nameof(Requirements));
-        OnPropertyChanged(nameof(CanAdd));
+        Revalidate();
     }
 
     public void Dispose()
@@ -49,6 +48,9 @@ public partial class ClassModel : ObservableRecipient, IDisposable
     #region Properties
 
     [ObservableProperty]
+    private int? _ID;
+
+    [ObservableProperty]
     private string _name = "Unknown";
 
     [ObservableProperty]
@@ -58,12 +60,16 @@ public partial class ClassModel : ObservableRecipient, IDisposable
     private int _credits;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(CanAdd))]
     private ObservableCollection<DependencyModel> _requirements = null!;
+    partial void OnRequirementsChanged(ObservableCollection<DependencyModel> value)
+    {
+        Revalidate();
+    }
 
     [ObservableProperty]
     private bool _isValid;
 
+    public bool AnyRequirements => Requirements.Count > 0;
     public bool CanAdd => Requirements.Count < (AllClasses.Count - 1);
 
     public static ObservableCollection<ClassModel> AllClasses => MainWindowVM.Instance.Classes;
@@ -86,24 +92,67 @@ public partial class ClassModel : ObservableRecipient, IDisposable
         }
     }
 
-    private void AddRequirement(ClassModel newRequirement, bool testValidity = true)
+    public void AddRequirement(ClassModel newRequirement, bool testValidity = true)
     {
         if (testValidity && !IsValidRequirement(newRequirement))
             return;
 
         DependencyModel dep = new DependencyModel(this, newRequirement);
         Requirements.Add(dep);
-        OnPropertyChanged(nameof(CanAdd));
+        Refresh();
     }
 
     [RelayCommand]
     public void DeleteRequirement(DependencyModel classModel)
     {
         Requirements.SafeRemove(classModel);
-        OnPropertyChanged(nameof(CanAdd));
+        Refresh();
     }
 
     #endregion Commands
+
+    #region DB Model
+
+    public static ClassModel ParseDBModel(DBClassModel dbModel)
+    {
+        return new ClassModel
+        {
+            ID = dbModel.ID,
+            Name = dbModel.Name,
+            URL = dbModel.URL,
+            Credits = dbModel.Credits,
+        };
+    }
+
+    public DBClassModel ToDBModel()
+    {
+        return new DBClassModel
+        {
+            ID = ID,
+            Name = Name,
+            URL = URL,
+            Credits = Credits,
+        };
+    }
+
+    #endregion DB Model
+
+    #region Validity
+
+    public void Refresh()
+    {
+        OnPropertyChanged(nameof(Requirements));
+        OnPropertyChanged(nameof(AnyRequirements));
+        OnPropertyChanged(nameof(CanAdd));
+    }
+
+    public void Revalidate()
+    {
+        Refresh();
+        RemoveInvalidRequirements();
+    }
+
+    #endregion Validity
 
     private void RemoveInvalidRequirements()
     {

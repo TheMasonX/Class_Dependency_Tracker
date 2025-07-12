@@ -7,24 +7,31 @@ using System.Windows;
 
 using Microsoft.VisualBasic;
 
+using Serilog;
+
 namespace ClassDependencyTracker.Utils.Extensions;
 
 public static class DispatcherUtils
 {
-    public static ObservableCollection<T> CreateObservableCollection<T>(IEnumerable<T>? collection = null)
+    public static ObservableCollection<T> CreateObservableCollection<T>(IEnumerable<T>? collection = null, bool invokeIfNoDispatcher = true)
     {
-        return Application.Current?.Dispatcher?.Invoke(() =>
-        {
-            return new ObservableCollection<T>(collection ?? []);
-        })!;
+        ObservableCollection<T> result = null!;
+        SafeInvoke(() => result = new ObservableCollection<T>(collection ?? []), invokeIfNoDispatcher);
+        return result;
     }
 
-    public static bool SafeInvoke(Action action, [CallerArgumentExpression(nameof(action))] string actionName = "")
+    public static bool SafeInvoke(Action action, bool invokeIfNoDispatcher = true, [CallerArgumentExpression(nameof(action))] string actionName = "")
     {
         var dispatcher = Application.Current?.Dispatcher;
         if (dispatcher is null)
         {
-            Trace.WriteLine($"Application.Current.Dispatcher is null, can't invoke {actionName}");
+            if (invokeIfNoDispatcher)
+            {
+                Log.Logger.Warning("Application.Current.Dispatcher is null, but we'll try invoking anyways {Action}", actionName);
+                action.Invoke();
+                return true;
+            }
+            Log.Logger.Warning("Application.Current.Dispatcher is null, can't invoke {Action}", actionName);
             return false;
         }
 
@@ -32,11 +39,11 @@ public static class DispatcherUtils
         return true;
     }
 
-    public static bool SafeInvoke(Func<bool> func, [CallerArgumentExpression(nameof(func))] string funcName = "")
+    public static bool SafeInvoke(Func<bool> func, bool invokeIfNoDispatcher = true, [CallerArgumentExpression(nameof(func))] string funcName = "")
     {
         bool res = false;
         void action() => res = func.Invoke();
-        if (!SafeInvoke(action, funcName))
+        if (!SafeInvoke(action, invokeIfNoDispatcher, funcName))
             return false;
 
         return res;
@@ -44,6 +51,6 @@ public static class DispatcherUtils
 
 
     public static bool SafeAdd<T>(this ObservableCollection<T> collection, T model) =>  SafeInvoke(() => collection.Add(model));
-
     public static bool SafeRemove<T>(this ObservableCollection<T> collection, T model) =>  SafeInvoke(() => collection.Remove(model));
+    public static bool SafeClear<T>(this ObservableCollection<T> collection) =>  SafeInvoke(collection.Clear);
 }

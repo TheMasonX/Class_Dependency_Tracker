@@ -58,15 +58,14 @@ public partial class NumericBox : TextBox
     //}
 
     [GeneratedRegex(@"[\d]{1,}")]
-    private static partial Regex GetIntRegex ();
-    public static readonly Regex IntRegex = GetIntRegex();
+    private static partial Regex IntRegex();
     public static Regex FloatRegex => new($"[\\d,\\{DecimalSeparator}]{{1,}}");
     public static Regex FloatSeparatorRegex => new($".*[{DecimalSeparator}]{{1,}}.*");
     public static string DecimalSeparator => CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator;
 
     private void NumericBox_PreviewTextInput (object sender, System.Windows.Input.TextCompositionEventArgs e)
     {
-        Regex match = (IsFloat && !FloatSeparatorRegex.IsMatch(Text)) ? FloatRegex : IntRegex;
+        Regex match = (IsFloat && !FloatSeparatorRegex.IsMatch(Text)) ? FloatRegex : IntRegex();
         e.Handled = !match.IsMatch(e.Text);
     }
 

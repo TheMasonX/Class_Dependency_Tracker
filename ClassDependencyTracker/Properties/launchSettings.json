@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "ClassDependencyTracker": {
+      "commandName": "Project"
+    },
+    "OpenWith": {
+      "commandName": "Project",
+      "commandLineArgs": "\"C:\\Users\\Luke\\Documents\\@College\\Dependencies.db\""
+    }
+  }
+}

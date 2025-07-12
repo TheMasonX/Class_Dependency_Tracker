@@ -43,7 +43,6 @@ public static class SQLExtensions
 
         int changes = command.ExecuteNonQuery();
         transaction.Commit();
-        connection.Close();
         return changes;
     }
 

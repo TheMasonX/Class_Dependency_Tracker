@@ -33,7 +33,7 @@ public class DBClassModel
 
     #region Static Methods
 
-    public static List<DBClassModel> ReadClasses(string filePath)
+    public static List<DBClassModel> Read(string filePath)
     {
         List<DBClassModel> classes = [];
 
@@ -44,6 +44,8 @@ public class DBClassModel
                 classes.Add(model);
         }
         SQLExtensions.ExecuteReader(connectionString, "Select * from Classes", rowReader);
+
+        Log.Logger.Information("Read {ClassCount} from {FilePath}", classes.Count, filePath);
 
         return classes;
     }
@@ -69,15 +71,16 @@ public class DBClassModel
         }
     }
 
-    public static bool SaveClasses(string filePath, IEnumerable<DBClassModel> classes)
+    public static bool Save(string filePath, IEnumerable<DBClassModel> classes)
     {
         string connectionString = SQLExtensions.GetConnectionString(filePath);
         StringBuilder sb = new StringBuilder();
         sb.AppendLine("Insert into Classes (ID, Name, URL, Credits) Values");
 
-        //IEnumerable<string> values = classes.Select(x => $"({x.ID.ToString() ?? "NULL"}, {x.Name}, {x.URL ??  "NULL"}, {Credits})");
         sb.AppendJoin(",\n", classes);
         int changes = SQLExtensions.ExecuteNonQuery(connectionString, sb.ToString());
+        Log.Logger.Information("Saved {ClassCount} classes to {FilePath} with {Changes} changes", classes.Count(), filePath, changes);
+
         return changes == classes.Count();
     }
 

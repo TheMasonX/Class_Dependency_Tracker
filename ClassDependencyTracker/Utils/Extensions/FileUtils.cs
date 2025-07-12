@@ -11,12 +11,14 @@ public static class FileUtils
     public const string AllFilesFilter = "All files (*.*)|*.*";
     public const string TextFilter = "Text file (*.txt)|*.txt";
     public const string ImageFilter = "Image files (*.bmp, *.jpg, *.png)|*.bmp;*.jpg;*.png";
-    public const string SQLFilter = "SQL files (*.sql)|*.sql";
+    public const string DBFilter = "SQLite Database files (*.db)|*.db";
+    public const string SQLFilter = "SQL script files (*.sql)|*.sql";
 
     public const string TextExtension = ".txt";
     public const string BMPExtension = ".bmp";
     public const string JPGExtension = ".jpg";
     public const string PNGExtension = ".png";
+    public const string DBExtension = ".db";
     public const string SQLExtension = ".sql";
 
     public static string FormatFileSize(int size) => FormatFileSize((ulong)size);

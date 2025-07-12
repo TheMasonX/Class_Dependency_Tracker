@@ -1,4 +1,7 @@
-﻿using ClassDependencyTracker.Models.DB;
+﻿using ClassDependencyTracker.Models;
+using ClassDependencyTracker.Models.DB;
+using ClassDependencyTracker.Utils.Extensions;
+using ClassDependencyTracker.ViewModels;
 
 using NUnit.Framework.Internal;
 
@@ -13,8 +16,7 @@ public class DBTests
     public void TearDown()
     {
         //Would throw if the file had been saved to
-        //if (File.Exists(TempFile))
-        //    File.Delete(TempFile);
+        DBUtils.DeleteDBFile(TempFile);
     }
 
     [Test]
@@ -23,7 +25,7 @@ public class DBTests
     {
         Assert.That(File.Exists(filePath));
 
-        List<DBClassModel> models = DBClassModel.ReadClasses(filePath);
+        List<DBClassModel> models = DBClassModel.Read(filePath);
         Console.WriteLine($"Found {models.Count} classes in DB file {filePath}");
         foreach (DBClassModel model in models)
         {
@@ -44,10 +46,10 @@ public class DBTests
             new DBClassModel { Name = "All The Classes", URL = "www.college.com", Credits = 4},
         ];
 
-        bool res = DBClassModel.SaveClasses(TempFile, classes);
+        bool res = DBClassModel.Save(TempFile, classes);
         Assert.That(res, "Failed to save the correct number of classes");
 
-        List<DBClassModel> models = DBClassModel.ReadClasses(TempFile);
+        List<DBClassModel> models = DBClassModel.Read(TempFile);
         Console.WriteLine($"Found {models.Count} classes in DB file {TempFile}");
         foreach (DBClassModel model in models)
         {
@@ -61,7 +63,7 @@ public class DBTests
     {
         Assert.That(File.Exists(filePath));
 
-        List<DBDependencyModel> models = DBDependencyModel.ReadDependencies(filePath);
+        List<DBDependencyModel> models = DBDependencyModel.Read(filePath);
         Console.WriteLine($"Found {models.Count} classes in DB file {filePath}");
         foreach (DBDependencyModel model in models)
         {
@@ -82,14 +84,53 @@ public class DBTests
             new DBDependencyModel { SourceID = 1, RequiredID = 3 },
         ];
 
-        bool res = DBDependencyModel.SaveDependencies(TempFile, dependencies);
+        bool res = DBDependencyModel.Save(TempFile, dependencies);
         Assert.That(res, "Failed to save the correct number of dependencies");
 
-        List<DBDependencyModel> models = DBDependencyModel.ReadDependencies(TempFile);
+        List<DBDependencyModel> models = DBDependencyModel.Read(TempFile);
         Console.WriteLine($"Found {models.Count} dependencies in DB file {TempFile}");
         foreach (DBDependencyModel model in models)
         {
             Console.WriteLine(model);
         }
+    }
+
+    [Test]
+    public void CreateDB()
+    {
+        DBUtils.CreateDB(TempFile);
+        Assert.That(File.Exists(TempFile));
+    }
+
+    [Test]
+    public void CreateAndSaveToDB()
+    {
+        DBUtils.CreateDB(TempFile);
+        Assert.That(File.Exists(TempFile));
+
+        ClassModel[] classes =
+        [
+            new ClassModel("Class 1") { URL = new Uri("www.college.com"), Credits = 2 },
+            new ClassModel("Other Class") { Credits = 3 },
+            new ClassModel("Hard Class") { Credits = 4 },
+        ];
+
+        //TODO: Singleton pattern made this hard to mock
+        MainWindowVM mainWindowVM = new MainWindowVM();
+        foreach (ClassModel model in classes)
+        {
+            mainWindowVM.Classes.Add(model);
+        }
+
+        classes[1].AddRequirement(classes[0]);
+        classes[2].AddRequirement(classes[0]);
+        classes[2].AddRequirement(classes[1]);
+
+        DBUtils.SaveToFile(TempFile, classes);
+        List<DBClassModel> dbClasses = DBClassModel.Read(TempFile);
+        List<DBDependencyModel> dbDependencies = DBDependencyModel.Read(TempFile);
+
+        Assert.That(dbClasses.Count, Is.EqualTo(classes.Length));
+        Assert.That(dbDependencies.Count, Is.EqualTo(3));
     }
 }

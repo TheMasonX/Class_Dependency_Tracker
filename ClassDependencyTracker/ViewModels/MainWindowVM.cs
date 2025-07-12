@@ -15,6 +15,7 @@ using ClassDependencyTracker.Utils.Extensions;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using ClassDependencyTracker.Models.DB;
 
 namespace ClassDependencyTracker.ViewModels;
 
@@ -22,19 +23,17 @@ public partial class MainWindowVM : ObservableObject, IDisposable
 {
     public static MainWindowVM Instance { get; private set; } = null!;
 
-    private const string _openFileDialogTitle = "Select Images To Convert";
-    private const string _inputExtensionFilter = "Image files (*.bmp, *.jpg, *.png)|*.bmp;*.jpg;*.png|All files (*.*)|*.*";
-    [GeneratedRegex(@"(\.bmp)|(\.jpg)|(\.png)")]
-    private static partial Regex GetInputExtensionRegex ();
-    public readonly Regex InputExtensionRegex = GetInputExtensionRegex();
+    private const string _openFileDialogTitle = "Select Class Dependency Database";
+    [GeneratedRegex(FileUtils.DBExtension)]
+    public static partial Regex FileExtensionRegex();
 
-    private const string _saveFileDialogTitle = "Save Video FileUtils";
-    private const string _outputExtensionFilter = "Video FileUtils (*.mp4)|*.mp4|All files (*.*)|*.*";
-    private const string _outputExtension = ".mp4";
+    private const string _saveFileDialogTitle = "Save Class Dependency Database";
 
     public MainWindowVM ()
     {
+        Settings.Default.Upgrade();
         Instance = this;
+        OpenWith();
     }
 
     public void Dispose()
@@ -91,12 +90,12 @@ public partial class MainWindowVM : ObservableObject, IDisposable
             {
                 Title = _openFileDialogTitle,
                 RestoreDirectory = true,
-                //CheckFileExists = true,
-                Multiselect = true,
-                Filter = _inputExtensionFilter,
+                CheckFileExists = true,
+                Multiselect = false,
+                Filter = FileUtils.DBFilter,
             };
             openFileDialog.ShowDialog();
-            OpenFiles(openFileDialog.FileNames);
+            OpenFile(openFileDialog.FileName);
         });
     }
 
@@ -106,38 +105,26 @@ public partial class MainWindowVM : ObservableObject, IDisposable
 
     #region Open
 
-    public void OpenFiles (IEnumerable<string>? files)
+    public void OpenWith()
     {
-        files = files?.Where(f => InputExtensionRegex.IsMatch(f));
-        if (files is null || !files.Any())
+        string? file = Environment.GetCommandLineArgs().FirstOrDefault(FileExtensionRegex().IsMatch);
+        if (file is not null && File.Exists(file))
+            Task.Run(() => OpenFile(file));
+        else if (Settings.Default.LoadLast && File.Exists(Settings.Default.LastInputFile))
+            OpenFile(Settings.Default.LastInputFile);
+    }
+
+    public void OpenFile(string filename)
+    {
+        Settings.Default.LastInputFile = filename;
+        Settings.Default.Save();
+
+        ClassModel[] classes = DBUtils.LoadFromFile(filename);
+        Classes.SafeClear();
+        foreach (ClassModel cls in classes)
         {
-            return;
+            Classes.SafeAdd(cls);
         }
-
-        int addCount = files.Count();
-        //Status = new LoadingStatus(FileGrid.Count, FileGrid.Count + addCount, "Item", "Items");
-
-        //Task.Run(() =>
-        //{
-        //    foreach (string file in files)
-        //    {
-        //        if (file.IsNullOrEmpty() || !InputExtensionRegex.IsMatch(file!))
-        //        {
-        //            continue;
-        //        }
-
-        //        if (FileGrid.OpenFile(file))
-        //        {
-        //            Status.Update(1);
-        //        }
-        //        else
-        //        {
-        //            Status = new TextStatus() { Status = $"Load Error for {file}", BGColor = Brushes.Red };
-        //        }
-        //    }
-        //    Status.Hide();
-        //    FileGrid.Refresh();
-        //});
     }
 
     #endregion Open
@@ -162,9 +149,9 @@ public partial class MainWindowVM : ObservableObject, IDisposable
                 FileName = OutputFileName,
                 OverwritePrompt = true,
                 AddExtension = true,
-                DefaultExt = _outputExtension,
+                DefaultExt = FileUtils.DBExtension,
                 RestoreDirectory = true,
-                Filter = _outputExtensionFilter,
+                Filter = FileUtils.DBFilter,
             };
 
             if (!Settings.Default.OutputDirectory.IsNullOrEmpty())
@@ -185,13 +172,8 @@ public partial class MainWindowVM : ObservableObject, IDisposable
 
     private void SaveToFile(string filePath)
     {
-        if (System.IO.File.Exists(OutputFilePath))
-        {
-            Trace.WriteLine($"FileUtils Exits at path {filePath}, deleting...");
-            System.IO.File.Delete(OutputFilePath);
-        }
-
-        Trace.WriteLine("Do something to save");
+        DBUtils.CreateDB(filePath);
+        DBUtils.SaveToFile(filePath, Classes.ToArray());
     }
 
     #endregion Public Methods
