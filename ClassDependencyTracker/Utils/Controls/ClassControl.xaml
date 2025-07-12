@@ -55,25 +55,24 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <Button Grid.Column="1" Content="{StaticResource +}" ToolTip="Add a prerequesite" Command="{Binding AddRequirementCommand}" Style="{StaticResource singleCharButton}"/>
+                    <Button Grid.Column="1" Content="{StaticResource +}" ToolTip="Add a prerequesite" Command="{Binding AddRequirementCommand}" IsEnabled="{Binding CanAdd}" Style="{StaticResource singleCharButton}"/>
                 </Grid>
 
                 <!-- Class List -->
-                <ListView Grid.Row="1" ItemsSource="{Binding Requirements}" SelectedItem="{Binding SelectedClass}" d:ItemsSource="{d:SampleData ItemCount=2}">
+                <ListView Grid.Row="1" ItemsSource="{Binding Requirements}" d:ItemsSource="{d:SampleData ItemCount=2}">
                     <ListView.Resources>
                         <classes:BindingProxy x:Key="otherClasses" Data="{Binding AllOtherClasses}"/>
-                        <classes:BindingProxy x:Key="selectedClass" Data="{Binding SelectedClass}"/>
                         <classes:BindingProxy x:Key="deleteClassCommand" Data="{Binding DeleteRequirementCommand}"/>
                     </ListView.Resources>
                     <ListView.ItemTemplate>
-                        <DataTemplate DataType="models:ClassModel">
+                        <DataTemplate DataType="models:DependencyModel">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="1*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
 
-                                <ComboBox ItemsSource="{Binding Data, Source={StaticResource otherClasses}}" SelectedItem="{Binding Data, Source={StaticResource selectedClass}}" d:SelectedIndex="0"/>
+                                <ComboBox ItemsSource="{Binding NonSourceClasses}" SelectedItem="{Binding RequiredClass}" DisplayMemberPath="Name" d:ItemsSource="{d:SampleData ItemCount=2}" d:SelectedIndex="0"/>
                                 <Button x:Name="removePrereq" Grid.Column="1" Content="{StaticResource X}" Command="{Binding Data, Source={StaticResource deleteClassCommand}}" CommandParameter="{Binding}" Style="{StaticResource singleCharButton}"/>
                             </Grid>
                         </DataTemplate>

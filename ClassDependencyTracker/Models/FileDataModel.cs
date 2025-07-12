@@ -13,6 +13,9 @@ namespace ClassDependencyTracker.Models;
 
 public interface IFileData<T>
 {
+    string FileExtensions { get; }
+    string FileFilter { get; }
+
     string FilePath { get; }
     string Name { get; }
     FileInfo? Info { get; }
@@ -23,21 +26,11 @@ public interface IFileData<T>
     bool SaveData (string outputPath);
 }
 
-public abstract class FileDataModel<T> : ObservableObject, IFileData<T>, IDisposable
+public abstract partial class FileDataModel<T> : ObservableObject, IFileData<T>, IDisposable
 {
-    public FileDataModel (string filePath)
+    protected FileDataModel(FileInfo fileInfo)
     {
-        if (filePath.IsNullOrEmpty())
-        {
-            return;
-        }
-
-        //_data = Image.FromFile(filePath);
-
-        FilePath = filePath;
-        Info = new(FilePath);
-        Name = Info.Name;
-        Size = (ulong)(Info?.Length ?? 0);
+        Info = new FileInfo(FilePath);
         LoadData();
     }
 
@@ -62,21 +55,25 @@ public abstract class FileDataModel<T> : ObservableObject, IFileData<T>, IDispos
         private set => SetProperty(ref _fileName, value);
     }
 
-    private FileInfo? _fileInfo;
-    public FileInfo? Info
+    [ObservableProperty]
+    private FileInfo? _info;
+    partial void OnInfoChanged(FileInfo? value)
     {
-        get => _fileInfo;
-        private set => SetProperty(ref _fileInfo, value);
+        if (value is null)
+            return;
+
+        FilePath = value.FullName;
+        Name = value.Name;
+        Size = (ulong)value.Length;
     }
 
+    [ObservableProperty]
     private ulong _size;
-    public ulong Size
-    {
-        get => _size;
-        private set => SetProperty(ref _size, value);
-    }
 
-    public string SizeFormatted => FormatFileSize();
+    public string SizeFormatted => FileUtils.FormatFileSize(Size);
+
+    public virtual string FileExtensions => "";
+    public virtual string FileFilter => FileUtils.AllFilesFilter;
 
     #endregion Properties
 
@@ -90,56 +87,29 @@ public abstract class FileDataModel<T> : ObservableObject, IFileData<T>, IDispos
     #region Private Methods
 
     protected abstract void LoadData ();
-
-    private string FormatFileSize ()
-    {
-        const double kb = 1024;
-        const double mb = 1024 * 1024;
-        const double gb = 1024 * 1024 * 1024;
-
-        if (Size < kb)
-        {
-            return $"{Size:N0}B";
-        }
-
-        if (Size < mb)
-        {
-            return $"{(Size / kb):N1}KB";
-        }
-
-        if (Size < gb)
-        {
-            return $"{(Size / mb):N1}MB";
-        }
-
-        return $"{(Size / gb):N1}GB";
-    }
+    
 
     #endregion Private Methods
 }
 
-public class ImageData : FileDataModel<Image>
+public class SQLData : FileDataModel<string>
 {
-    private Image? _data;
+    private string _data = "";
 
-    public ImageData (string filePath) : base(filePath) { }
+    public SQLData(string filePath) : base(new FileInfo(filePath)) { }
 
     public override void Dispose ()
     {
-        _data?.Dispose();
-        _data = null;
         GC.SuppressFinalize(this);
     }
 
     #region Properties
 
-    public int PixelCount => (Data?.Size.Width * Data?.Size.Height) ?? 0;
-
     #endregion Properties
 
     #region Public Methods
 
-    public override Image? GetData ()
+    public override string? GetData()
     {
         if (_data is null)
         {
@@ -149,7 +119,7 @@ public class ImageData : FileDataModel<Image>
         return _data;
     }
 
-    public override bool SaveData (string outputPath)
+    public override bool SaveData(string outputPath)
     {
         if (_data is null || outputPath.IsNullOrEmpty())
         {
@@ -158,7 +128,7 @@ public class ImageData : FileDataModel<Image>
 
         try
         {
-            _data.Save(outputPath);
+            File.WriteAllText(outputPath, _data);
             Log.Information("Saved {Name} to {Path}", Name, outputPath);
             return true;
         }
@@ -175,14 +145,9 @@ public class ImageData : FileDataModel<Image>
 
     protected override void LoadData ()
     {
-        if (FilePath.IsNullOrEmpty())
-        {
-            return;
-        }
-
         try
         {
-            _data = Image.FromFile(FilePath);
+            _data = File.ReadAllText(Info!.FullName);
         }
         catch (Exception ex)
         {
@@ -192,60 +157,3 @@ public class ImageData : FileDataModel<Image>
 
     #endregion Private Methods
 }
-
-//public class VideoDataModel : FileDataModel<FFMpegCore.FFM>
-//{s
-//    private FFMpegCore.FFMpeg? _data;
-
-//    public VideoDataModel (string filePath) : base(filePath) { }
-
-//    public override void Dispose ()
-//    {
-//        _data?();
-//        _data = null;
-//        GC.SuppressFinalize(this);
-//    }
-
-//    #region Public Methods
-
-//    public override Image? GetData ()
-//    {
-//        return _data;
-//    }
-
-//    public override bool SaveData (string outputPath)
-//    {
-//        if (_data is null || outputPath.IsNullOrEmpty()) return false;
-
-//        try
-//        {
-//            _data.Save(outputPath);
-//            return true;
-//        }
-//        catch (Exception ex)
-//        {
-//            Trace.WriteLine($"Saving {Name} to {outputPath} threw error: {ex}");
-//            return false;
-//        }
-//    }
-
-//    #endregion Public Methods
-
-//    #region Private Methods
-
-//    protected override void LoadData ()
-//    {
-//        if (Info is null) return;
-
-//        try
-//        {
-//            _data = FFMpeg.
-//        }
-//        catch (Exception ex)
-//        {
-//            Trace.WriteLine($"Loading {Name} from {Path} threw error: {ex}");
-//        }
-//    }
-
-//    #endregion Private Methods
-//}

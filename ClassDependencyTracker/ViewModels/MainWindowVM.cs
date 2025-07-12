@@ -28,8 +28,8 @@ public partial class MainWindowVM : ObservableObject, IDisposable
     private static partial Regex GetInputExtensionRegex ();
     public readonly Regex InputExtensionRegex = GetInputExtensionRegex();
 
-    private const string _saveFileDialogTitle = "Save Video File";
-    private const string _outputExtensionFilter = "Video File (*.mp4)|*.mp4|All files (*.*)|*.*";
+    private const string _saveFileDialogTitle = "Save Video FileUtils";
+    private const string _outputExtensionFilter = "Video FileUtils (*.mp4)|*.mp4|All files (*.*)|*.*";
     private const string _outputExtension = ".mp4";
 
     public MainWindowVM ()
@@ -185,10 +185,10 @@ public partial class MainWindowVM : ObservableObject, IDisposable
 
     private void SaveToFile(string filePath)
     {
-        if (File.Exists(OutputFilePath))
+        if (System.IO.File.Exists(OutputFilePath))
         {
-            Trace.WriteLine($"File Exits at path {filePath}, deleting...");
-            File.Delete(OutputFilePath);
+            Trace.WriteLine($"FileUtils Exits at path {filePath}, deleting...");
+            System.IO.File.Delete(OutputFilePath);
         }
 
         Trace.WriteLine("Do something to save");

@@ -1,0 +1,13 @@
+// Generated at https://dbdiagram.io/
+
+Table classes {
+  id integer [pk, not null]
+  name varchar
+  url varchar
+}
+
+Table requirements {
+  id integer [pk, not null]
+  source_id integer [not null, ref: > classes.id]
+  required_id integer [not null, ref: > classes.id]
+}

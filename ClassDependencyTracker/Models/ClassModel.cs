@@ -1,19 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Drawing;
 using System.Linq;
-using System.Windows.Data;
 using System.Windows.Input;
 
+using ClassDependencyTracker.Messages;
+using ClassDependencyTracker.Utils.Classes;
 using ClassDependencyTracker.Utils.Extensions;
 using ClassDependencyTracker.ViewModels;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 
 namespace ClassDependencyTracker.Models;
 
-public partial class ClassModel : ObservableObject
+public partial class ClassModel : ObservableRecipient, IDisposable
 {
     private static int _classIndex = 0;
 
@@ -25,17 +28,25 @@ public partial class ClassModel : ObservableObject
     public ClassModel(string name, IEnumerable<ClassModel>? requirements = null)
     {
         Name = name;
-        Requirements = DispatcherUtils.CreateObservableCollection(requirements);
-        AllOtherClasses = new ListCollectionView(AllClasses)
-        {
-            Filter = FilterOutSelf,
-        };
+        var deps = requirements?.Select(x => new DependencyModel(this, x)) ?? [];
+        Requirements = DispatcherUtils.CreateObservableCollection(deps);
+        Messenger.Register<ClassesUpdatedMsg>(this, OnClassedUpdated);
+    }
+
+    private void OnClassedUpdated(object recipient, ClassesUpdatedMsg message)
+    {
+        RemoveInvalidRequirements();
+        OnPropertyChanged(nameof(Requirements));
+        OnPropertyChanged(nameof(CanAdd));
+    }
+
+    public void Dispose()
+    {
+        Messenger.UnregisterAll(this);
+        GC.SuppressFinalize(this);
     }
 
     #region Properties
-
-    [ObservableProperty]
-    private bool _isValid;
 
     [ObservableProperty]
     private string _name = "Unknown";
@@ -44,17 +55,18 @@ public partial class ClassModel : ObservableObject
     private string? _URL;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(CanRemove))]
-    private ClassModel? _selectedClass;
+    private int _credits;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(CanRemove))]
-    private ObservableCollection<ClassModel> _requirements = null!;
+    [NotifyPropertyChangedFor(nameof(CanAdd))]
+    private ObservableCollection<DependencyModel> _requirements = null!;
 
-    public bool CanRemove => Requirements.Count > 0 && SelectedClass is not null;
+    [ObservableProperty]
+    private bool _isValid;
+
+    public bool CanAdd => Requirements.Count < (AllClasses.Count - 1);
 
     public static ObservableCollection<ClassModel> AllClasses => MainWindowVM.Instance.Classes;
-    public ListCollectionView AllOtherClasses { get; }
 
     #endregion Properties
 
@@ -67,27 +79,44 @@ public partial class ClassModel : ObservableObject
     public void AddRequirement()
     {
         //TODO: Dialog to pick a class
-        ClassModel? requirement = AllClasses.FirstOrDefault();
+        ClassModel? requirement = AllClasses.FirstOrDefault(IsValidRequirement);
         if (requirement is not null)
-            Requirements.Add(requirement);
+        {
+            AddRequirement(requirement, false);
+        }
+    }
 
-        OnPropertyChanged(nameof(CanRemove));
+    private void AddRequirement(ClassModel newRequirement, bool testValidity = true)
+    {
+        if (testValidity && !IsValidRequirement(newRequirement))
+            return;
+
+        DependencyModel dep = new DependencyModel(this, newRequirement);
+        Requirements.Add(dep);
+        OnPropertyChanged(nameof(CanAdd));
     }
 
     [RelayCommand]
-    public void DeleteRequirement(ClassModel classModel)
+    public void DeleteRequirement(DependencyModel classModel)
     {
         Requirements.SafeRemove(classModel);
-        OnPropertyChanged(nameof(CanRemove));
+        OnPropertyChanged(nameof(CanAdd));
     }
 
     #endregion Commands
 
-    private bool FilterOutSelf(object obj)
+    private void RemoveInvalidRequirements()
     {
-        if (obj is not ClassModel otherClass) return false;
+        var invalidRequirements = Requirements.Where(x => x.RequiredClass is null || x.SourceClass == this).ToArray();
+        foreach (var requirement in invalidRequirements)
+        {
+            DeleteRequirement(requirement);
+        }
+    }
 
-        return otherClass != this;
+    private bool IsValidRequirement(ClassModel classModel)
+    {
+        return (classModel != this) && !Requirements.Any(x => x.RequiredClass == classModel);
     }
 
     public override string ToString() => Name;

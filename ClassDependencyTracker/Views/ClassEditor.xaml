@@ -5,9 +5,9 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:ClassDependencyTracker.Views"
              xmlns:viewmodels="clr-namespace:ClassDependencyTracker.ViewModels"
-             xmlns:models="clr-namespace:ClassDependencyTracker.Models" xmlns:classes="clr-namespace:ClassDependencyTracker.Utils.Classes"
+             xmlns:models="clr-namespace:ClassDependencyTracker.Models" xmlns:classes="clr-namespace:ClassDependencyTracker.Utils.Classes" xmlns:controls="clr-namespace:ClassDependencyTracker.Utils.Controls"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="200">
+             d:DesignHeight="450" d:DesignWidth="300">
     <UserControl.DataContext>
         <viewmodels:ClassEditorVM/>
     </UserControl.DataContext>
@@ -29,11 +29,36 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <Button Grid.Column="1" Content="{StaticResource +}" ToolTip="Add Class" Command="{Binding AddClassCommand}" Style="{StaticResource singleCharButton}"/>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Grid Margin="2,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBox Grid.ColumnSpan="3" Text="{Binding ClassNameFilter, UpdateSourceTrigger=PropertyChanged}"/>
+                <TextBlock Text="🔍" Visibility="{Binding IsSearching, Converter={StaticResource invertedBoolToVis}}"/>
+                <Button Grid.Column="2" Content="{StaticResource X}" Command="{Binding ClearFilterCommand}" Visibility="{Binding IsSearching, Converter={StaticResource boolToVis}}"
+                        Background="Transparent" BorderThickness="0" MinHeight="10" MinWidth="10" Padding="0" Margin="4,5"/>
+            </Grid>
+            <!--<TextBox Text="{Binding ClassNameFilter, UpdateSourceTrigger=PropertyChanged}"/>-->
+            <CheckBox Grid.Column="1" Content="Advanced" IsChecked="{Binding ShowAdvanced}"/>
+
+            <StackPanel Grid.Row="1" Orientation="Horizontal" Visibility="{Binding ShowAdvanced, Converter={StaticResource boolToVis}}">
+                <CheckBox Content="Match Case" IsChecked="{Binding CaseSensitive}"/>
+                <ComboBox ItemsSource="{Binding FilterTypes}" SelectedItem="{Binding FilterType}" Margin="2"/>
+            </StackPanel>
+
+            <Button Grid.Column="4" Content="{StaticResource +}" ToolTip="Add Class" Command="{Binding AddClassCommand}" Style="{StaticResource singleCharButton}"/>
         </Grid>
 
         <!-- Class List -->
-        <ListView Grid.Row="1" ItemsSource="{Binding Classes}" SelectedItem="{Binding SelectedClass}" d:ItemsSource="{d:SampleData ItemCount=2}">
+        <ListView Grid.Row="1" ItemsSource="{Binding ClassesView}" d:ItemsSource="{d:SampleData ItemCount=2}">
             <ListView.ItemTemplate>
                 <DataTemplate DataType="{x:Type models:ClassModel}">
                     <local:ClassControl DataContext="{Binding}" HorizontalAlignment="Stretch" DeleteCommand="{Binding Data, Source={StaticResource deleteCommand}}"/>
