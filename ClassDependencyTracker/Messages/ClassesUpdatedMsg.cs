@@ -6,12 +6,14 @@ using System.Threading.Tasks;
 
 namespace ClassDependencyTracker.Messages;
 
-public enum ClassUpdateType
+public enum UpdateType
 {
-    Added = 0,
-    Removed = 1,
+    None = 0,
+    Added = 1,
+    Removed = 2,
+    Replaced = 3,
 }
 
-public record ClassesUpdatedMsg(ClassUpdateType UpdateType)
+public record ClassesUpdatedMsg(UpdateType ClassUpdate, UpdateType RequirementUpdate)
 {
 }

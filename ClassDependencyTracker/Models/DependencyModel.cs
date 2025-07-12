@@ -17,18 +17,17 @@ public partial class DependencyModel : ObservableObject
 {
     public DependencyModel(ClassModel source, ClassModel requirement)
     {
-        _sourceClass = source;
-        _requiredClass = requirement;
+        SourceClass = source;
+        RequiredClass = requirement;
         DispatcherUtils.SafeInvoke(() => NonSourceClasses = new ListCollectionView(AllClasses) { Filter = FilterOutSource });
     }
 
     #region Properties
 
-    [ObservableProperty]
-    private ClassModel _sourceClass;
+    public ClassModel SourceClass { get; }
 
     [ObservableProperty]
-    private ClassModel _requiredClass;
+    private ClassModel _requiredClass = null!;
 
     public static ObservableCollection<ClassModel> AllClasses => MainWindowVM.Instance.Classes;
     public ListCollectionView NonSourceClasses { get; private set; } = null!;
@@ -96,7 +95,7 @@ public partial class DependencyModel : ObservableObject
 
     public override string ToString()
     {
-        return $"{SourceClass} -> {RequiredClass}";
+        return $"'{SourceClass.Name}' Requires '{RequiredClass.Name}'";
     }
 
     public static bool operator ==(DependencyModel l, DependencyModel r) => Equals(l, r);

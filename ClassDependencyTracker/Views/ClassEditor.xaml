@@ -42,8 +42,8 @@
 
                 <TextBox Grid.ColumnSpan="3" Text="{Binding ClassNameFilter, UpdateSourceTrigger=PropertyChanged}"/>
                 <TextBlock Grid.Column="1" Text="🔎" HorizontalAlignment="Right" Visibility="{Binding IsSearching, Converter={StaticResource invertedBoolToVis}}" Opacity="0.5"/>
-                <Button Grid.Column="1" Content="{StaticResource X}" Command="{Binding ClearFilterCommand}" Visibility="{Binding IsSearching, Converter={StaticResource boolToVis}}"
-                        Background="Transparent" HorizontalAlignment="Right" BorderThickness="0" MinHeight="10" MinWidth="10" Padding="0" Margin="0,5" d:Visibility="Hidden"/>
+                <Button Grid.Column="1" Content="{StaticResource X}" Command="{Binding ClearFilterCommand}" Visibility="{Binding IsSearching, Converter={StaticResource boolToVis}}" ToolTip="Clear the search term"
+                        Background="Transparent" HorizontalAlignment="Right" BorderThickness="0" MinHeight="10" MinWidth="10" Padding="0" Margin="0,2" BorderBrush="Transparent" d:Visibility="Hidden"/>
             </Grid>
             <!--<TextBox Text="{Binding ClassNameFilter, UpdateSourceTrigger=PropertyChanged}"/>-->
             <CheckBox Grid.Column="1" Content="Advanced" IsChecked="{Binding ShowAdvanced}"/>

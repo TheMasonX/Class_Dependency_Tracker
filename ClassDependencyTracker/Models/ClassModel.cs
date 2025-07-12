@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Drawing;
 using System.Linq;
+using System.Security.Claims;
+using System.Windows;
 using System.Windows.Input;
 
 using ClassDependencyTracker.Messages;
@@ -15,10 +17,13 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 
+using Serilog;
+
 namespace ClassDependencyTracker.Models;
 
 public partial class ClassModel : ObservableRecipient, IDisposable
 {
+    private const int _maxDepth = 50;
     private static int _classIndex = 0;
 
     public ClassModel() : this($"Class {_classIndex++}")
@@ -32,11 +37,6 @@ public partial class ClassModel : ObservableRecipient, IDisposable
         var deps = requirements?.Select(x => new DependencyModel(this, x)) ?? [];
         Requirements = DispatcherUtils.CreateObservableCollection(deps);
         Messenger.Register<ClassesUpdatedMsg>(this, OnClassedUpdated);
-    }
-
-    private void OnClassedUpdated(object recipient, ClassesUpdatedMsg message)
-    {
-        Revalidate();
     }
 
     public void Dispose()
@@ -104,7 +104,21 @@ public partial class ClassModel : ObservableRecipient, IDisposable
     private bool _isValid;
 
     [ObservableProperty]
-    private bool _isExpanded;
+    private bool _isExpanded = true;
+
+    private int _depth = 0;
+    public int Depth
+    {
+        get
+        {
+            if (_depth > _maxDepth)
+            {
+                Log.Logger.Error("Calculating Depth for class {ClassName} surpassed max depth of {MaxDepth}. Cause is probably a cycle.", Name, _maxDepth);
+                return _depth;
+            }
+            return _depth = !AnyRequirements ? 0 : Requirements.Max(x => x.RequiredClass.Depth) + 1;
+        }
+    }
 
     public bool AnyRequirements => Requirements.Count > 0;
     public bool CanAdd => Requirements.Count < (AllClasses.Count - 1);
@@ -137,13 +151,27 @@ public partial class ClassModel : ObservableRecipient, IDisposable
         DependencyModel dep = new DependencyModel(this, newRequirement);
         Requirements.Add(dep);
         Refresh();
+        Messenger.Send(new ClassesUpdatedMsg(UpdateType.None, UpdateType.Added));
     }
 
     [RelayCommand]
     public void DeleteRequirement(DependencyModel classModel)
     {
+        string requiredName = classModel.RequiredClass.Name;
+        string title = $"Delete Requirement for {requiredName}?";
+        string message = $"Do you wish to delete the requirement for class {requiredName}?";
+        bool result = DialogUtils.ConfirmationDialog(title, message);
+        if (!result) //User cancelled
+            return;
+
+        DeleteRequirementSilent(classModel);
+    }
+
+    public void DeleteRequirementSilent(DependencyModel classModel)
+    {
         Requirements.SafeRemove(classModel);
         Refresh();
+        Messenger.Send(new ClassesUpdatedMsg(UpdateType.None, UpdateType.Removed));
     }
 
     #endregion Commands
@@ -187,18 +215,25 @@ public partial class ClassModel : ObservableRecipient, IDisposable
 
     public void Revalidate()
     {
-        Refresh();
         RemoveInvalidRequirements();
+        Refresh();
     }
-
-    #endregion Validity
 
     private void RemoveInvalidRequirements()
     {
-        var invalidRequirements = Requirements.Where(x => x.RequiredClass is null || x.SourceClass == this).ToArray();
+        DependencyModel[] currentRequirements = Requirements.ToArray();
+        List<DependencyModel> invalidRequirements = [];
+        for (int i = 0; i < currentRequirements.Length; i++)
+        {
+            var model = currentRequirements[i];
+            if (model.RequiredClass is null || model.RequiredClass == this || currentRequirements[0..i].Contains(model))
+                invalidRequirements.Add(model);
+        }
+
+        //var invalidRequirements = Requirements.Where(x => x.RequiredClass is null || x.RequiredClass == this).ToArray();
         foreach (var requirement in invalidRequirements)
         {
-            DeleteRequirement(requirement);
+            DeleteRequirementSilent(requirement);
         }
     }
 
@@ -207,5 +242,24 @@ public partial class ClassModel : ObservableRecipient, IDisposable
         return (classModel != this) && !Requirements.Any(x => x.RequiredClass == classModel);
     }
 
-    public override string ToString() => Name;
+    #endregion Validity
+
+    private void OnClassedUpdated(object recipient, ClassesUpdatedMsg message)
+    {
+        Revalidate();
+    }
+
+    public override string ToString()
+    {
+        string[] reqNames = Requirements.Select(x => x.RequiredClass.Name).ToArray();
+
+        string formattedRequirements = reqNames.Length switch
+        {
+            0 => "",
+            > 3 => $" | {reqNames.Length} Requirements",
+            _ => $" | Requirements: [{string.Join(", ", reqNames)}]",
+        };
+
+        return $"Class: {Name} | Depth: {Depth}{formattedRequirements}";
+    }
 }

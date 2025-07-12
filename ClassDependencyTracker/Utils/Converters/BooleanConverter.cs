@@ -35,6 +35,7 @@ public class BoolToBrushConverter() : BooleanConverter<Brush>(Brushes.Green, Bru
 { }
 
 public class BoolToGridLengthConverter() : BooleanConverter<GridLength>(GridLength.Auto, new GridLength(0))
-{
+{ }
 
-}
+public class BoolToStringConverter() : BooleanConverter<string>("True", "False")
+{ }

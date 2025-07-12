@@ -104,7 +104,8 @@ public static class DBUtils
 
         foreach (DependencyModel dependencyModel in dependencies)
         {
-            dependencyModel.SourceClass.AddRequirement(dependencyModel.RequiredClass);
+            if (dependencyModel.RequiredClass is not null)
+                dependencyModel.SourceClass.AddRequirement(dependencyModel.RequiredClass);
         }
 
         return classes;

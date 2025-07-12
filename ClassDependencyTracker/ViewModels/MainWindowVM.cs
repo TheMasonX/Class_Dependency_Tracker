@@ -1,20 +1,23 @@
-﻿using System.IO;
+﻿using System.Collections.ObjectModel;
+using System.IO;
 using System.Text.RegularExpressions;
+using System.Windows;
+
+using ClassDependencyTracker.Messages;
+using ClassDependencyTracker.Models;
+using ClassDependencyTracker.Models.DB;
+using ClassDependencyTracker.Properties;
+using ClassDependencyTracker.Utils.Extensions;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 
 using Microsoft.Win32;
 
-using ClassDependencyTracker.Models;
-using ClassDependencyTracker.Properties;
-using ClassDependencyTracker.Utils.Extensions;
-using System.Collections.ObjectModel;
-using ClassDependencyTracker.Models.DB;
-
 namespace ClassDependencyTracker.ViewModels;
 
-public partial class MainWindowVM : ObservableObject, IDisposable
+public partial class MainWindowVM : ObservableRecipient, IDisposable
 {
     public static MainWindowVM Instance { get; private set; } = null!;
 
@@ -33,6 +36,7 @@ public partial class MainWindowVM : ObservableObject, IDisposable
 
     public void Dispose()
     {
+        Messenger.UnregisterAll(this);
         GC.SuppressFinalize(this);
     }
 
@@ -77,6 +81,39 @@ public partial class MainWindowVM : ObservableObject, IDisposable
     #region Commands
 
     [RelayCommand]
+    public void AddClass()
+    {
+        ClassModel newClass = new ClassModel($"Class {Classes.Count + 1}");
+        Classes.Add(newClass);
+        Messenger.Send(new ClassesUpdatedMsg(UpdateType.Added, UpdateType.None));
+    }
+
+    [RelayCommand]
+    public void DeleteClass(ClassModel classModel)
+    {
+        string title = $"Delete Class {classModel.Name}?";
+        string message = $"Do you wish to delete {classModel.Name}?";
+        bool result = DialogUtils.ConfirmationDialog(title, message);
+        if (!result) //User cancelled
+            return;
+
+        RemoveFromRequirements(classModel);
+        Classes.SafeRemove(classModel);
+        Messenger.Send(new ClassesUpdatedMsg(UpdateType.Removed, UpdateType.None));
+    }
+
+    private void RemoveFromRequirements(ClassModel classModel)
+    {
+        var invalidatedRequirements = Classes.SelectMany(x => x.Requirements)
+                    .Where(x => x.RequiredClass == classModel)
+                    .ToArray();
+        foreach (var invalid in invalidatedRequirements)
+        {
+            invalid.SourceClass.DeleteRequirementSilent(invalid);
+        }
+    }
+
+    [RelayCommand]
     public Task OnOpenFiles ()
     {
         return Task.Run(() =>
@@ -106,7 +143,7 @@ public partial class MainWindowVM : ObservableObject, IDisposable
         if (filePath is not null && File.Exists(filePath))
             Task.Run(() => OpenFile(filePath));
         else if (Settings.Default.LoadLast && File.Exists(Settings.Default.LastInputFile))
-            OpenFile(Settings.Default.LastInputFile);
+            Task.Run(() => OpenFile(Settings.Default.LastInputFile));
     }
 
     public void OpenFile(string filePath)
@@ -121,6 +158,8 @@ public partial class MainWindowVM : ObservableObject, IDisposable
         {
             Classes.SafeAdd(cls);
         }
+        Messenger.Send(new ClassesUpdatedMsg(UpdateType.Replaced, UpdateType.Replaced));
+
         if (classes.Length > 0)
             Status = TextStatus.Success($"Loaded {classes.Length} classes from database file: {filePath}");
         else

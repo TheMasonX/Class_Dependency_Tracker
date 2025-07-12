@@ -23,6 +23,9 @@ public partial class ClassEditorVM : ObservableRecipient
 
     #region Properties
 
+    public IRelayCommand AddClassCommand => MainWindowVM.Instance.AddClassCommand;
+    public IRelayCommand<ClassModel> DeleteClassCommand => MainWindowVM.Instance.DeleteClassCommand;
+
     [ObservableProperty]
     private ObservableCollection<ClassModel> _classes = null!;
 
@@ -66,26 +69,6 @@ public partial class ClassEditorVM : ObservableRecipient
     #endregion Properties
 
     #region Commands
-
-    [RelayCommand]
-    public void AddClass()
-    {
-        ClassModel newClass = new ClassModel($"Class {Classes.Count}");
-        Classes.Add(newClass);
-        Messenger.Send(new ClassesUpdatedMsg(ClassUpdateType.Added));
-    }
-
-    [RelayCommand]
-    public void DeleteClass(ClassModel @class)
-    {
-        string title = $"Delete Class {@class}?";
-        string message = $"Do you wish to delete class {@class}?";
-        MessageBoxResult result = MessageBox.Show(message, title, MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No);
-        if (result != MessageBoxResult.Yes) return;
-
-        Classes.SafeRemove(@class);
-        Messenger.Send(new ClassesUpdatedMsg(ClassUpdateType.Removed));
-    }
 
     [RelayCommand]
     public void ClearFilter()
