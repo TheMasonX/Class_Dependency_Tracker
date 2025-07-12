@@ -5,6 +5,7 @@
  */
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -47,7 +48,8 @@ public partial class MathConverter :
     {
         try
         {
-            decimal result = Parse(parameter.ToString()).Eval(values);
+            decimal result = Parse(parameter.ToString()!).Evaluate(values);
+
             if (targetType == typeof(decimal))
             {
                 return result;
@@ -73,7 +75,7 @@ public partial class MathConverter :
                 return (long)result;
             }
 
-            throw new ArgumentException(String.Format("Unsupported target type {0}", targetType.FullName));
+            throw new ArgumentException($"Unsupported target type {targetType.FullName}");
         }
         catch (Exception ex)
         {
@@ -94,14 +96,15 @@ public partial class MathConverter :
         return this;
     }
 #endif
+
     protected virtual void ProcessException (Exception ex)
     {
-        Console.WriteLine(ex.Message);
+        Trace.WriteLine(ex.Message);
     }
 
     private IExpression Parse (string s)
     {
-        if (!_storedExpressions.TryGetValue(s, out IExpression result))
+        if (!_storedExpressions.TryGetValue(s, out IExpression? result))
         {
             result = new Parser().Parse(s);
             _storedExpressions[s] = result;
@@ -112,7 +115,7 @@ public partial class MathConverter :
 
     interface IExpression
     {
-        decimal Eval (object[] args);
+        decimal Evaluate(object[] args);
     }
 
     class Constant : IExpression
@@ -123,14 +126,11 @@ public partial class MathConverter :
         {
             if (!decimal.TryParse(text, out _value))
             {
-                throw new ArgumentException(String.Format("'{0}' is not a valid number", text));
+                throw new ArgumentException($"'{text}' is not a valid number");
             }
         }
 
-        public decimal Eval (object[] args)
-        {
-            return _value;
-        }
+        public decimal Evaluate (object[] args) => _value;
     }
 
     class Variable : IExpression
@@ -141,7 +141,7 @@ public partial class MathConverter :
         {
             if (!int.TryParse(text, out _index) || _index < 0)
             {
-                throw new ArgumentException(String.Format("'{0}' is not a valid parameter index", text));
+                throw new ArgumentException($"'{text}' is not a valid parameter index");
             }
         }
 
@@ -150,11 +150,11 @@ public partial class MathConverter :
             _index = n;
         }
 
-        public decimal Eval (object[] args)
+        public decimal Evaluate (object[] args)
         {
             if (_index >= args.Length)
             {
-                throw new ArgumentException(String.Format("MathConverter: parameter index {0} is out of range. {1} parameter(s) supplied", _index, args.Length));
+                throw new ArgumentException($"MathConverter: parameter index {_index} is out of range. {args.Length} parameter(s) supplied");
             }
 
             return System.Convert.ToDecimal(args[_index]);
@@ -169,14 +169,14 @@ public partial class MathConverter :
             '-' => (a, b) => (a - b),
             '*' => (a, b) => (a * b),
             '/' => (a, b) => (a / b),
-            _ => throw new ArgumentException("Invalid operation " + operation),
+            _ => throw new ArgumentException($"Invalid operation: {operation}"),
         };
         private readonly IExpression _left = left;
         private readonly IExpression _right = right;
 
-        public decimal Eval (object[] args)
+        public decimal Evaluate (object[] args)
         {
-            return _operation(_left.Eval(args), _right.Eval(args));
+            return _operation(_left.Evaluate(args), _right.Evaluate(args));
         }
     }
 
@@ -184,17 +184,23 @@ public partial class MathConverter :
     {
         private readonly IExpression _param = param;
 
-        public decimal Eval (object[] args)
-        {
-            return -_param.Eval(args);
-        }
+        public decimal Evaluate (object[] args) => -_param.Evaluate(args);
     }
 
     partial class Parser
     {
-        private string text;
+        private string text = "";
         private int pos;
 
+        [GeneratedRegex(@"(\d+\.?\d*|\d*\.?\d+)")]
+        private static partial Regex decimalRegex();
+
+        /// <summary>
+        /// Parse the expression text into an <see cref="IExpression"/>
+        /// </summary>
+        /// <param name="text">Text containing a mathematical expression representable by an <see cref="IExpression"/></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException">Throws if the expression fails to parse</exception>
         public IExpression Parse (string text)
         {
             try
@@ -207,9 +213,7 @@ public partial class MathConverter :
             }
             catch (Exception ex)
             {
-                string msg =
-                    String.Format("MathConverter: error parsing expression '{0}'. {1} at position {2}", text, ex.Message, pos);
-
+                string msg = $"MathConverter: error parsing expression '{text}'. {ex.Message} at position {pos}";
                 throw new ArgumentException(msg, ex);
             }
         }
@@ -276,58 +280,47 @@ public partial class MathConverter :
 
             var c = text[pos];
 
-            if (c == '+')
+            switch (c)
             {
-                ++pos;
-                return ParseFactor();
-            }
+                case '+':
+                    ++pos;
+                    return ParseFactor();
+                case '-':
+                    ++pos;
+                    return new Negate(ParseFactor());
+                case 'x':
+                case 'a':
+                    return CreateVariable(0);
+                case 'y':
+                case 'b':
+                    return CreateVariable(1);
+                case 'z':
+                case 'c':
+                    return CreateVariable(2);
+                case 't':
+                case 'd':
+                    return CreateVariable(3);
+                case '(':
+                    {
+                        ++pos;
+                        var expression = ParseExpression();
+                        SkipWhiteSpace();
+                        Require(')');
+                        SkipWhiteSpace();
+                        return expression;
+                    }
 
-            if (c == '-')
-            {
-                ++pos;
-                return new Negate(ParseFactor());
-            }
-
-            if (c == 'x' || c == 'a')
-            {
-                return CreateVariable(0);
-            }
-
-            if (c == 'y' || c == 'b')
-            {
-                return CreateVariable(1);
-            }
-
-            if (c == 'z' || c == 'c')
-            {
-                return CreateVariable(2);
-            }
-
-            if (c == 't' || c == 'd')
-            {
-                return CreateVariable(3);
-            }
-
-            if (c == '(')
-            {
-                ++pos;
-                var expression = ParseExpression();
-                SkipWhiteSpace();
-                Require(')');
-                SkipWhiteSpace();
-                return expression;
-            }
-
-            if (c == '{')
-            {
-                ++pos;
-                var end = text.IndexOf('}', pos);
-                if (end < 0) { --pos; throw new ArgumentException("Unmatched '{'"); }
-                if (end == pos) { throw new ArgumentException("Missing parameter index after '{'"); }
-                var result = new Variable(text[pos..end].Trim());
-                pos = end + 1;
-                SkipWhiteSpace();
-                return result;
+                case '{':
+                    {
+                        ++pos;
+                        var end = text.IndexOf('}', pos);
+                        if (end < 0) { --pos; throw new ArgumentException("Unmatched '{'"); }
+                        if (end == pos) { throw new ArgumentException("Missing parameter index after '{'"); }
+                        var result = new Variable(text[pos..end].Trim());
+                        pos = end + 1;
+                        SkipWhiteSpace();
+                        return result;
+                    }
             }
 
             var match = decimalRegex().Match(text[pos..]);
@@ -339,7 +332,7 @@ public partial class MathConverter :
             }
             else
             {
-                throw new ArgumentException(String.Format("Unexpeted character '{0}'", c));
+                throw new ArgumentException($"Unexpected character '{c}'");
             }
         }
 
@@ -352,7 +345,7 @@ public partial class MathConverter :
 
         private void SkipWhiteSpace ()
         {
-            while (pos < text.Length && Char.IsWhiteSpace((text[pos])))
+            while (pos < text.Length && char.IsWhiteSpace((text[pos])))
             {
                 ++pos;
             }
@@ -375,8 +368,5 @@ public partial class MathConverter :
                 throw new ArgumentException("Unexpected character '" + text[pos] + "'");
             }
         }
-
-        [GeneratedRegex(@"(\d+\.?\d*|\d*\.?\d+)")]
-        private static partial Regex decimalRegex ();
     }
 }

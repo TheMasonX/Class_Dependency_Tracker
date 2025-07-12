@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Windows.Media;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -14,11 +13,15 @@ using ClassDependencyTracker.Models;
 using ClassDependencyTracker.Properties;
 using ClassDependencyTracker.Utils.Extensions;
 using System.Diagnostics;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace ClassDependencyTracker.ViewModels;
 
 public partial class MainWindowVM : ObservableObject, IDisposable
 {
+    public static MainWindowVM Instance { get; private set; } = null!;
+
     private const string _openFileDialogTitle = "Select Images To Convert";
     private const string _inputExtensionFilter = "Image files (*.bmp, *.jpg, *.png)|*.bmp;*.jpg;*.png|All files (*.*)|*.*";
     [GeneratedRegex(@"(\.bmp)|(\.jpg)|(\.png)")]
@@ -31,6 +34,7 @@ public partial class MainWindowVM : ObservableObject, IDisposable
 
     public MainWindowVM ()
     {
+        Instance = this;
     }
 
     public void Dispose()
@@ -69,6 +73,8 @@ public partial class MainWindowVM : ObservableObject, IDisposable
         }
     }
 
+    public ObservableCollection<ClassModel> Classes { get; } = DispatcherUtils.CreateObservableCollection<ClassModel>();
+
     [ObservableProperty]
     private IAppStatus? _status;
 
@@ -90,25 +96,7 @@ public partial class MainWindowVM : ObservableObject, IDisposable
                 Filter = _inputExtensionFilter,
             };
             openFileDialog.ShowDialog();
-            OpenFiles(openFileDialog.FileNames.AsQueryable());
-        });
-    }
-
-    [RelayCommand]
-    public Task OnSave ()
-    {
-        return Task.Run(() =>
-        {
-            Save();
-        });
-    }
-
-    [RelayCommand]
-    public Task OnSaveAs ()
-    {
-        return Task.Run(() =>
-        {
-            SaveAs();
+            OpenFiles(openFileDialog.FileNames);
         });
     }
 
@@ -118,7 +106,7 @@ public partial class MainWindowVM : ObservableObject, IDisposable
 
     #region Open
 
-    public void OpenFiles (IQueryable<string>? files)
+    public void OpenFiles (IEnumerable<string>? files)
     {
         files = files?.Where(f => InputExtensionRegex.IsMatch(f));
         if (files is null || !files.Any())
@@ -154,6 +142,7 @@ public partial class MainWindowVM : ObservableObject, IDisposable
 
     #endregion Open
 
+    [RelayCommand]
     public Task Save ()
     {
         if (OutputFilePath.IsNullOrEmpty()) //No path, try save as instead
@@ -162,16 +151,7 @@ public partial class MainWindowVM : ObservableObject, IDisposable
         return Task.Run(() => SaveToFile(OutputFilePath));
     }
 
-    private void SaveToFile(string filePath)
-    {
-        if (File.Exists(OutputFilePath))
-        {
-            File.Delete(OutputFilePath);
-        }
-
-        Trace.WriteLine("Do something to save");
-    }
-
+    [RelayCommand]
     public Task SaveAs ()
     {
         return Task.Run(() =>
@@ -200,8 +180,18 @@ public partial class MainWindowVM : ObservableObject, IDisposable
                 return;
 
             SaveToFile(OutputFilePath);
-            Save();
         });
+    }
+
+    private void SaveToFile(string filePath)
+    {
+        if (File.Exists(OutputFilePath))
+        {
+            Trace.WriteLine($"File Exits at path {filePath}, deleting...");
+            File.Delete(OutputFilePath);
+        }
+
+        Trace.WriteLine("Do something to save");
     }
 
     #endregion Public Methods

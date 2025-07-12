@@ -4,5 +4,8 @@
     <converters:GestureConverter x:Key="gestureConverter"/>
     <converters:MathConverter x:Key="math"/>
     <BooleanToVisibilityConverter x:Key="boolToVis"/>
+    <converters:InvertedBoolConverter x:Key="invertedBool"/>
+    <converters:InvertedBoolToVisibilityConverter x:Key="invertedBoolToVis"/>
+    <converters:BoolToBrushConverter x:Key="boolToErrorBrush" True="Green" False="Red"/>
 
 </ResourceDictionary>

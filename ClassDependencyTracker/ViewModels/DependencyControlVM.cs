@@ -7,17 +7,17 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ClassDependencyTracker.ViewModels;
 
-public partial class DependencyViewerVM : ObservableRecipient
+public partial class DependencyControlVM : ObservableRecipient
 {
-    public DependencyViewerVM()
+    public DependencyControlVM()
     {
-        Classes = MainWindowVM.Instance.Classes;
+
     }
 
     #region Properties
 
     [ObservableProperty]
-    private ObservableCollection<ClassModel> _classes = null!;
+    private ClassModel _class = null!;
 
     #endregion Properties
 }

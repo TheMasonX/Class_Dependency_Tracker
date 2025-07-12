@@ -16,17 +16,16 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 using ClassDependencyTracker.Models;
-
 using ClassDependencyTracker.ViewModels;
 
 namespace ClassDependencyTracker.Views;
 
 /// <summary>
-/// Interaction logic for DependencyViewerVM.xaml
+/// Interaction logic for ClassEditor.xaml
 /// </summary>
-public partial class DependencyViewer : UserControl
+public partial class ClassEditor : UserControl
 {
-    public DependencyViewer()
+    public ClassEditor()
     {
         InitializeComponent();
     }
@@ -41,19 +40,19 @@ public partial class DependencyViewer : UserControl
 
     //// Using a DependencyProperty as the backing store for Classes.  This enables animation, styling, binding, etc...
     //public static readonly DependencyProperty ClassesProperty =
-    //    DependencyProperty.Register("Classes", typeof(ObservableCollection<ClassModel>), typeof(DependencyViewer), new PropertyMetadata(OnClassesPropertyChanged));
+    //    DependencyProperty.Register("Classes", typeof(ObservableCollection<ClassModel>), typeof(ClassEditor), new PropertyMetadata(OnClassesPropertyChanged));
 
     //public static void OnClassesPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     //{
-    //    if (d is not DependencyViewer uc)
+    //    if (d is not ClassEditor uc)
     //    {
-    //        Trace.WriteLine($"Couldn't get UserControl DependencyViewer from type {d.GetType()}");
+    //        Trace.WriteLine($"Couldn't get UserControl ClassEditor from type {d.GetType()}");
     //        return;
     //    }
 
-    //    if (uc.DataContext is not DependencyViewerVM vm)
+    //    if (uc.DataContext is not ClassEditorVM vm)
     //    {
-    //        Trace.WriteLine($"Couldn't get ViewModel DependencyViewerVM for UserControl {uc}");
+    //        Trace.WriteLine($"Couldn't get ViewModel ClassEditorVM for UserControl {uc}");
     //        return;
     //    }
 

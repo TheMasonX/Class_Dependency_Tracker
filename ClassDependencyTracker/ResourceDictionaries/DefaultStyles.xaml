@@ -2,68 +2,103 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:controls="clr-namespace:ClassDependencyTracker.Utils.Controls"
                     xmlns:views="clr-namespace:ClassDependencyTracker.Views"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib"
                     x:Name="Styles">
-    <Style TargetType="Button" x:Key="button">
-        <Setter Property="MinWidth" Value="60" />
-        <Setter Property="VerticalContentAlignment" Value="Center" />
-        <Setter Property="MinHeight" Value="25" />
+
+    <!--https://www.htmlsymbols.xyz/punctuation-symbols/x-marks-->
+    <system:String x:Key="X">❌</system:String>
+    
+    <!--https://www.alt-codes.net/plus-sign-symbols-->
+    <system:String x:Key="+">➕</system:String>
+    
+    <!--#region Universal -->
+    <Style TargetType="Border">
+        <Setter Property="CornerRadius" Value="2"/>
     </Style>
-    <Style TargetType="Menu" x:Key="menu">
+
+    <Style TargetType="Button">
+        <Setter Property="MinWidth" Value="60"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="MinHeight" Value="25"/>
+        <Setter Property="Margin" Value="2"/>
+    </Style>
+
+    <Style TargetType="Menu">
         <Setter Property="VerticalAlignment" Value="Stretch"/>
-        <Setter Property="VerticalContentAlignment" Value="Center" />
-        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
         <Setter Property="Padding" Value="5,0"/>
     </Style>
-    <Style TargetType="MenuItem" x:Key="menuItem">
-        <Setter Property="HorizontalContentAlignment" Value="Center" />
-        <Setter Property="VerticalContentAlignment" Value="Center" />
+    
+    <Style TargetType="MenuItem">
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="Padding" Value="5,3"/>
     </Style>
-    <Style TargetType="TextBlock" x:Key="textBlock">
-        <Setter Property="VerticalAlignment" Value="Center" />
-        <Setter Property="Padding" Value="5,2" />
-    </Style>
-    <Style TargetType="TextBox" x:Key="textBox">
-        <Setter Property="VerticalAlignment" Value="Center" />
-        <Setter Property="VerticalContentAlignment" Value="Center" />
-        <Setter Property="MinWidth" Value="100" />
-        <Setter Property="MinHeight" Value="25" />
-    </Style>
-
-    <Style TargetType="DataGrid" x:Key="dataGrid">
-        <Setter Property="CanUserSortColumns" Value="True" />
-        <Setter Property="AutoGenerateColumns" Value="False" />
-        <Setter Property="HeadersVisibility" Value="Column" />
+    
+    <Style TargetType="TextBlock">
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Padding" Value="5,2"/>
     </Style>
     
-    <Style TargetType="DataGridCell" x:Key="dataCellStyle">
-        <Setter Property="VerticalContentAlignment" Value="Center" />
-        <Setter Property="VerticalAlignment" Value="Stretch" />
+    <Style TargetType="TextBox">
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="MinWidth" Value="100"/>
+        <Setter Property="MinHeight" Value="25"/>
     </Style>
 
+    <Style TargetType="ListViewItem">
+        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+    </Style>
+    <!--#endregion Universal-->
+
+    <!--#region DataGrid -->
+    <Style TargetType="DataGrid">
+        <Setter Property="CanUserSortColumns" Value="True"/>
+        <Setter Property="AutoGenerateColumns" Value="False"/>
+        <Setter Property="HeadersVisibility" Value="Column"/>
+    </Style>
+    
+    <Style TargetType="DataGridCell">
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalAlignment" Value="Stretch"/>
+    </Style>
 
     <Style TargetType="TextBlock" x:Key="dataTextCell">
-        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="VerticalAlignment" Value="Center"/>
     </Style>
+    
     <DataTemplate x:Key="dataTextCellTemplate">
         <TextBlock Text="{Binding Name}" Style="{StaticResource dataTextCell}"/>
     </DataTemplate>
+    
     <Style TargetType="DataGridCell" x:Key="dataTextCellStyle">
-        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+    </Style>
+    <!--#endregion DataGrid-->
+    
+    <!--#region Keyed Styles -->
+    <Style TargetType="Button" x:Key="singleCharButton">
+        <Setter Property="MinWidth" Value="20"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="MinHeight" Value="20"/>
+        <Setter Property="Margin" Value="2"/>
     </Style>
 
     <Style TargetType="controls:NumericBox">
-        <Setter Property="MinWidth" Value="35" />
-        <Setter Property="MaxWidth" Value="80" />
-        <Setter Property="VerticalAlignment" Value="Center" />
-        <Setter Property="VerticalContentAlignment" Value="Center" />
-        <Setter Property="AutoWordSelection" Value="True" />
+        <Setter Property="MinWidth" Value="35"/>
+        <Setter Property="MaxWidth" Value="80"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="AutoWordSelection" Value="True"/>
         <Setter Property="Padding" Value="5,2"/>
     </Style>
 
     <Style TargetType="ToggleButton" x:Key="filterToggle">
-        <Setter Property="VerticalContentAlignment" Value="Center" />
-        <Setter Property="MinHeight" Value="25" />
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="MinHeight" Value="25"/>
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="BorderBrush" Value="Transparent"/>
         <Setter Property="BorderThickness" Value="0"/>
@@ -86,4 +121,6 @@
             </Setter.Value>
         </Setter>
     </Style>
+    <!--#endregion Keyed Styles-->
+
 </ResourceDictionary>

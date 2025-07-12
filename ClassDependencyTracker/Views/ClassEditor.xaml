@@ -1,0 +1,44 @@
+﻿<UserControl x:Class="ClassDependencyTracker.Views.ClassEditor"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ClassDependencyTracker.Views"
+             xmlns:viewmodels="clr-namespace:ClassDependencyTracker.ViewModels"
+             xmlns:models="clr-namespace:ClassDependencyTracker.Models" xmlns:classes="clr-namespace:ClassDependencyTracker.Utils.Classes"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="200">
+    <UserControl.DataContext>
+        <viewmodels:ClassEditorVM/>
+    </UserControl.DataContext>
+    <UserControl.Resources>
+        <classes:BindingProxy x:Key="deleteCommand" Data="{Binding DeleteClassCommand}"/>
+    </UserControl.Resources>
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="1*"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Header -->
+        <Grid Grid.Row="0" x:Name="classEditorHeader" Background="WhiteSmoke">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="1" Content="{StaticResource +}" ToolTip="Add Class" Command="{Binding AddClassCommand}" Style="{StaticResource singleCharButton}"/>
+        </Grid>
+
+        <!-- Class List -->
+        <ListView Grid.Row="1" ItemsSource="{Binding Classes}" SelectedItem="{Binding SelectedClass}" d:ItemsSource="{d:SampleData ItemCount=2}">
+            <ListView.ItemTemplate>
+                <DataTemplate DataType="{x:Type models:ClassModel}">
+                    <local:ClassControl DataContext="{Binding}" HorizontalAlignment="Stretch" DeleteCommand="{Binding Data, Source={StaticResource deleteCommand}}"/>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+    </Grid>
+</UserControl>
