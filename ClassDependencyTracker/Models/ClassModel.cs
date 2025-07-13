@@ -59,6 +59,9 @@ public partial class ClassModel : ObservableRecipient, IDisposable
     [ObservableProperty]
     private int _credits;
 
+    [ObservableProperty]
+    private string? _notes;
+
     #region Semester
 
     [ObservableProperty]
@@ -121,7 +124,7 @@ public partial class ClassModel : ObservableRecipient, IDisposable
     }
 
     public bool AnyRequirements => Requirements.Count > 0;
-    public bool CanAdd => Requirements.Count < (AllClasses.Count - 1);
+    public bool CanAdd => GetValidRequirements(true).Any();
 
     public static ObservableCollection<ClassModel> AllClasses => MainWindowVM.Instance.Classes;
 
@@ -136,11 +139,16 @@ public partial class ClassModel : ObservableRecipient, IDisposable
     public void AddRequirement()
     {
         //TODO: Dialog to pick a class
-        ClassModel? requirement = AllClasses.FirstOrDefault(IsValidRequirement);
+        ClassModel? requirement = GetValidRequirements(true).FirstOrDefault();
         if (requirement is not null)
         {
             AddRequirement(requirement, false);
         }
+    }
+
+    public IEnumerable<ClassModel> GetValidRequirements(bool duplicateCheck)
+    {
+        return AllClasses.Where(x => IsValidRequirement(x, duplicateCheck));
     }
 
     public void AddRequirement(ClassModel newRequirement, bool testValidity = true)
@@ -171,9 +179,9 @@ public partial class ClassModel : ObservableRecipient, IDisposable
         {
             ID = dbModel.ID,
             Name = dbModel.Name,
-            URL = dbModel.URL,
             Credits = dbModel.Credits,
             Semester = dbModel.Semester,
+            Notes = dbModel.Notes,
         };
     }
 
@@ -183,9 +191,9 @@ public partial class ClassModel : ObservableRecipient, IDisposable
         {
             ID = ID,
             Name = Name,
-            URL = URL,
             Credits = Credits,
             Semester = Semester,
+            Notes = Notes,
         };
     }
 
@@ -224,12 +232,27 @@ public partial class ClassModel : ObservableRecipient, IDisposable
         }
     }
 
-    private bool IsValidRequirement(ClassModel classModel)
+    public bool IsValidRequirement(ClassModel classModel, bool duplicateCheck = true)
     {
-        return (classModel != this) && !Requirements.Any(x => x.RequiredClass == classModel);
+        if (classModel == this) //Can't require ourselves
+            return false;
+
+        if (duplicateCheck && Requirements.Any(x => x.RequiredClass == classModel)) //No duplicates (unless we're checking from an existing requirement
+            return false;
+
+        ClassModel[] flattenedTree = classModel.FlattenDependencyTree().ToArray();
+        if (flattenedTree.Any(x => x == this)) //Circular reference
+            return false;
+
+        return true; //Passed all tests
     }
 
     #endregion Validity
+
+    public IEnumerable<ClassModel> FlattenDependencyTree()
+    {
+        return Requirements.Select(x => x.RequiredClass).Concat(Requirements.SelectMany(x => x.RequiredClass.FlattenDependencyTree()));
+    }
 
     private void OnClassedUpdated(object recipient, ClassesUpdatedMsg message)
     {

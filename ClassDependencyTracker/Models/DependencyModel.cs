@@ -43,7 +43,11 @@ public partial class DependencyModel : ObservableObject
 
     private bool FilterOutSource(object obj)
     {
-        return (obj is ClassModel model) && model != SourceClass;
+        if (obj is not ClassModel model)
+            return false;
+        
+        //Ask the source if this is a valid class, but don't check for duplicates since that would disclude the current class
+        return SourceClass.IsValidRequirement(model, false);
     }
 
     public static DependencyModel? ParseDBModel(DBDependencyModel dbModel, IEnumerable<ClassModel> classes)

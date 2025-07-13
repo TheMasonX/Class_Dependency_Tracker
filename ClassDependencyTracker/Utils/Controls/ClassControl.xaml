@@ -12,7 +12,8 @@
     </d:UserControl.DataContext>
     <UserControl.Resources>
         <converters:BoolToGridLengthConverter x:Key="boolToGridLength" True="Auto" False="0"/>
-        <converters:BoolToStringConverter x:Key="boolToShowHide" True="Hide details" False="Show details"/>
+        <converters:BoolToStringConverter x:Key="boolToShowHide" True="Hide" False="Show"/>
+        <!--<converters:BoolToStringConverter x:Key="boolToShowHide" True="Hide details" False="Show details"/>-->
     </UserControl.Resources>
 
     <Grid Margin="2" Background="LightGray" HorizontalAlignment="Stretch">
@@ -32,11 +33,9 @@
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="3*"/>
         </Grid.ColumnDefinitions>
-
-        <Expander Grid.Row="1" Grid.ColumnSpan="2" Header="{Binding IsExpanded, Converter={StaticResource boolToShowHide}}" IsExpanded="{Binding IsExpanded}"/>
-
+        
         <!--Name-->
-        <Label Grid.Row="0" Grid.Column="0" Content="_Name:"/>
+        <Expander Grid.Row="0" Grid.Column="0" Header="_Name:" IsExpanded="{Binding IsExpanded}" VerticalAlignment="Center"/>
         <Grid Grid.Row="0" Grid.Column="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*"/>
@@ -46,9 +45,6 @@
             <Button Grid.Column="1" Content="{StaticResource X}" ToolTip="Delete this class" Style="{StaticResource singleCharButton}" Command="{Binding DeleteClassCommand}"/>
         </Grid>
 
-        <!--URL-->
-        <Label Grid.Row="2" Grid.Column="0" Content="_URL:"/>
-        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding URL, UpdateSourceTrigger=PropertyChanged}"/>
 
         <!--Credits-->
         <Label Grid.Row="3" Grid.Column="0" Content="_Credits:"/>
@@ -67,6 +63,11 @@
             <CheckBox Grid.Column="1" Content="S_pring" IsChecked="{Binding Spring}"/>
             <CheckBox Grid.Column="2" Content="S_ummer" IsChecked="{Binding Summer}"/>
         </Grid>
+
+        <!-- Notes -->
+        <Label Grid.Row="5" Grid.Column="0" Content="_Notes:"/>
+        <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" AcceptsTab="True" MaxHeight="80" VerticalScrollBarVisibility="Auto"/>
+
 
         <!--#region Prereqs-->
         <Grid Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" Name="prereqs">

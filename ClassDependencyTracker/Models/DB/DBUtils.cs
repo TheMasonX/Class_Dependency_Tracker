@@ -16,9 +16,9 @@ public static class DBUtils
         CREATE TABLE IF NOT EXISTS "Classes" (
         	"ID"	INTEGER NOT NULL,
         	"Name"	TEXT NOT NULL,
-        	"URL"	TEXT,
         	"Credits"	INTEGER NOT NULL DEFAULT 0,
             "Semester"	INTEGER NOT NULL DEFAULT 0,
+            "Notes"	TEXT,
         	PRIMARY KEY("ID" AUTOINCREMENT)
         );
         CREATE TABLE IF NOT EXISTS "Dependencies" (

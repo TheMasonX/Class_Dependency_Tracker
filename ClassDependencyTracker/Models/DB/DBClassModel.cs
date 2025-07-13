@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
@@ -26,18 +27,22 @@ public class DBClassModel
 
     public int? ID { get; set; }
     public string Name { get; set; } = "";
-    public string? URL { get; set; }
     public int Credits { get; set; }
     public Semester Semester { get; set; }
+    public string? Notes { get; set; }
 
     #endregion Properties
 
     public override string ToString()
     {
         string id = ID.HasValue ? ID.Value.ToString() : "NULL";
-        string url = !URL.IsNullOrEmpty() ? $"\"{URL}\"" : "NULL";
-        return $"({id}, \"{Name}\", {url}, {Credits}, {(int)Semester})";
+        string notes = !Notes.IsNullOrEmpty() ? $"\"{Notes}\"" : "NULL";
+        return $"({id}, \"{Name}\", {Credits}, {(int)Semester}, {notes})";
     }
+
+    private const string _columns = "ID, Name, Credits, Semester, Notes";
+    private const string _select = $"Select * from Classes"; //Use * instead of columns for backwards compatibility
+    private const string _insert = $"Insert into Classes ({ _columns}) Values";
 
     #region Static Methods
 
@@ -51,7 +56,7 @@ public class DBClassModel
             if (TryReadRow(reader, out DBClassModel? model))
                 classes.Add(model);
         }
-        SQLExtensions.ExecuteReader(connectionString, "Select * from Classes", rowReader);
+        SQLExtensions.ExecuteReader(connectionString, _select, rowReader);
 
         Log.Logger.Information("Read {ClassCount} from {FilePath}", classes.Count, filePath);
 
@@ -62,13 +67,14 @@ public class DBClassModel
     {
         try
         {
+            int index = 0;
             model = new DBClassModel
             {
-                ID = reader.SafeGetInt(0),
-                Name = reader.GetString(1),
-                URL = reader.SafeGetString(2),
-                Credits = reader.SafeGetInt(3, 0).Value,
-                Semester = (Semester)reader.SafeGetInt(4, 0).Value,
+                ID = reader.SafeGetInt(index++),
+                Name = reader.GetString(index++),
+                Credits = reader.SafeGetInt(index++, 0).Value,
+                Semester = (Semester)reader.SafeGetInt(index++, 0).Value,
+                Notes = reader.SafeGetString(index++),
             };
             return true;
         }
@@ -82,9 +88,14 @@ public class DBClassModel
 
     public static bool Save(string filePath, IEnumerable<DBClassModel> classes)
     {
+        if (!classes.Any())
+        {
+            return true;
+        }
+
         string connectionString = SQLExtensions.GetConnectionString(filePath);
         StringBuilder sb = new StringBuilder();
-        sb.AppendLine("Insert into Classes (ID, Name, URL, Credits, Semester) Values");
+        sb.AppendLine(_insert);
 
         sb.AppendJoin(",\n", classes);
         int? changes = SQLExtensions.ExecuteNonQuery(connectionString, sb.ToString());

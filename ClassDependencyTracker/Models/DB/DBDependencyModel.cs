@@ -26,6 +26,10 @@ public class DBDependencyModel
         return $"({id}, {SourceID}, {RequiredID})";
     }
 
+    private const string _columns = "ID, SourceID, RequiredID";
+    private const string _select = "Select * from Dependencies"; //Use * instead of columns for backwards compatibility
+    private const string _insert = $"Insert into Dependencies ({_columns}) Values";
+
     #region Static Methods
 
     public static List<DBDependencyModel> Read(string filePath)
@@ -38,8 +42,8 @@ public class DBDependencyModel
             if (TryReadRow(reader, out DBDependencyModel? model))
                 dependencies.Add(model);
         }
-        SQLExtensions.ExecuteReader(connectionString, "Select * from Dependencies", rowReader);
 
+        SQLExtensions.ExecuteReader(connectionString, _select, rowReader);
         return dependencies;
     }
 
@@ -47,11 +51,12 @@ public class DBDependencyModel
     {
         try
         {
+            int index = 0;
             model = new DBDependencyModel
             {
-                ID = reader.SafeGetInt(0),
-                SourceID = reader.GetInt32(1),
-                RequiredID = reader.GetInt32(2),
+                ID = reader.SafeGetInt(index++),
+                SourceID = reader.GetInt32(index++),
+                RequiredID = reader.GetInt32(index++),
             };
             return true;
         }
@@ -70,7 +75,7 @@ public class DBDependencyModel
 
         string connectionString = SQLExtensions.GetConnectionString(filePath);
         StringBuilder sb = new StringBuilder();
-        sb.AppendLine("Insert into Dependencies (ID, SourceID, RequiredID) Values");
+        sb.AppendLine(_insert);
 
         sb.AppendJoin(",\n", requirements);
         int? changes = SQLExtensions.ExecuteNonQuery(connectionString, sb.ToString());
