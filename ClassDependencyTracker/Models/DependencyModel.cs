@@ -1,15 +1,15 @@
-﻿using System;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Windows.Data;
 
-using ClassDependencyTracker.Models;
+using ClassDependencyTracker.Messages;
 using ClassDependencyTracker.Models.DB;
 using ClassDependencyTracker.Utils.Extensions;
 using ClassDependencyTracker.ViewModels;
 
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 
-using Serilog;
 
 namespace ClassDependencyTracker.Models;
 
@@ -19,18 +19,25 @@ public partial class DependencyModel : ObservableObject
     {
         SourceClass = source;
         RequiredClass = requirement;
-        DispatcherUtils.SafeInvoke(() => NonSourceClasses = new ListCollectionView(AllClasses) { Filter = FilterOutSource });
+        NonSourceClasses = AllClasses.CreateListCollectionView(FilterOutSource);
     }
 
     #region Properties
+
 
     public ClassModel SourceClass { get; }
 
     [ObservableProperty]
     private ClassModel _requiredClass = null!;
+    partial void OnRequiredClassChanged(ClassModel value)
+    {
+        WeakReferenceMessenger.Default.Send(new ClassesUpdatedMsg(UpdateType.None, UpdateType.Replaced));
+    }
 
     public static ObservableCollection<ClassModel> AllClasses => MainWindowVM.Instance.Classes;
     public ListCollectionView NonSourceClasses { get; private set; } = null!;
+
+    public IRelayCommand<DependencyModel> DeleteRequirementCommand => MainWindowVM.Instance.DeleteRequirementCommand;
 
     #endregion Properties
 

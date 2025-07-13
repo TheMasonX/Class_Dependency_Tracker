@@ -30,41 +30,4 @@ public partial class DependencyViewer : UserControl
     {
         InitializeComponent();
     }
-
-    #region Dependency Properties
-
-    //public ObservableCollection<ClassModel> Classes
-    //{
-    //    get { return (ObservableCollection<ClassModel>)GetValue(ClassesProperty); }
-    //    set { SetValue(ClassesProperty, value); }
-    //}
-
-    //// Using a DependencyProperty as the backing store for Classes.  This enables animation, styling, binding, etc...
-    //public static readonly DependencyProperty ClassesProperty =
-    //    DependencyProperty.Register("Classes", typeof(ObservableCollection<ClassModel>), typeof(DependencyViewer), new PropertyMetadata(OnClassesPropertyChanged));
-
-    //public static void OnClassesPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-    //{
-    //    if (d is not DependencyViewer uc)
-    //    {
-    //        Trace.WriteLine($"Couldn't get UserControl DependencyViewer from type {d.GetType()}");
-    //        return;
-    //    }
-
-    //    if (uc.DataContext is not DependencyViewerVM vm)
-    //    {
-    //        Trace.WriteLine($"Couldn't get ViewModel DependencyViewerVM for UserControl {uc}");
-    //        return;
-    //    }
-
-    //    if (e.NewValue is not ObservableCollection<ClassModel> classes)
-    //    {
-    //        Trace.WriteLine($"Couldn't get Classes for UserControl {uc}. NewValue is {e.NewValue}.");
-    //        return;
-    //    }
-
-    //    vm.Classes = classes;
-    //}
-
-    #endregion Dependency Properties
 }

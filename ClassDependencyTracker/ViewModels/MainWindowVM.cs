@@ -21,10 +21,9 @@ public partial class MainWindowVM : ObservableRecipient, IDisposable
 {
     public static MainWindowVM Instance { get; private set; } = null!;
 
-    private const string _openFileDialogTitle = "Select Class Dependency Database";
     [GeneratedRegex(FileUtils.DBExtension)]
     public static partial Regex FileExtensionRegex();
-
+    private const string _openFileDialogTitle = "Select Class Dependency Database";
     private const string _saveFileDialogTitle = "Save Class Dependency Database";
 
     public MainWindowVM ()
@@ -43,10 +42,10 @@ public partial class MainWindowVM : ObservableRecipient, IDisposable
 
     #region Properties
 
-    private string? _outputFileName;
+    private string _outputFileName = Settings.Default.OutputFileName;
     public string OutputFileName
     {
-        get => _outputFileName ??= "";
+        get => _outputFileName;
         set
         {
             if (SetProperty(ref _outputFileName, value))
@@ -57,10 +56,10 @@ public partial class MainWindowVM : ObservableRecipient, IDisposable
         }
     }
 
-    private string? _outputFilePath;
+    private string _outputFilePath = Settings.Default.OutputFilePath;
     public string OutputFilePath
     {
-        get => _outputFilePath ??= "";
+        get => _outputFilePath;
         set
         {
             if (SetProperty(ref _outputFilePath, value))
@@ -79,6 +78,9 @@ public partial class MainWindowVM : ObservableRecipient, IDisposable
     #endregion Properties
 
     #region Commands
+
+    //TODO: A separate class should handle all of the class/dependency state
+    #region Global Button Handlers
 
     [RelayCommand]
     public void AddClass()
@@ -102,6 +104,19 @@ public partial class MainWindowVM : ObservableRecipient, IDisposable
         Messenger.Send(new ClassesUpdatedMsg(UpdateType.Removed, UpdateType.None));
     }
 
+    [RelayCommand]
+    public void DeleteRequirement(DependencyModel requirement)
+    {
+        string requiredName = requirement.RequiredClass.Name;
+        string title = $"Delete Requirement for {requiredName}?";
+        string message = $"Do you wish to delete the requirement for class {requiredName}?";
+        bool result = DialogUtils.ConfirmationDialog(title, message);
+        if (!result) //User cancelled
+            return;
+
+        requirement.SourceClass.DeleteRequirementSilent(requirement);
+    }
+
     private void RemoveFromRequirements(ClassModel classModel)
     {
         var invalidatedRequirements = Classes.SelectMany(x => x.Requirements)
@@ -112,6 +127,10 @@ public partial class MainWindowVM : ObservableRecipient, IDisposable
             invalid.SourceClass.DeleteRequirementSilent(invalid);
         }
     }
+
+    #endregion Global Button Handlers
+
+    #region Open
 
     [RelayCommand]
     public Task OnOpenFiles ()
@@ -126,23 +145,20 @@ public partial class MainWindowVM : ObservableRecipient, IDisposable
                 Multiselect = false,
                 Filter = FileUtils.DBFilter,
             };
-            openFileDialog.ShowDialog();
+            bool? res = openFileDialog.ShowDialog();
+            if (res != true) //User cancelled
+                return;
+
             OpenFile(openFileDialog.FileName);
         });
     }
 
-    #endregion Commands
-
-    #region Public Methods
-
-    #region Open
-
     public void OpenWith()
     {
         string? filePath = Environment.GetCommandLineArgs().FirstOrDefault(FileExtensionRegex().IsMatch);
-        if (filePath is not null && File.Exists(filePath))
+        if (File.Exists(filePath)) //Valid file in the command args
             Task.Run(() => OpenFile(filePath));
-        else if (Settings.Default.LoadLast && File.Exists(Settings.Default.LastInputFile))
+        else if (Settings.Default.LoadLast && File.Exists(Settings.Default.LastInputFile)) //Fallback of trying to open the last file, if that's enabled
             Task.Run(() => OpenFile(Settings.Default.LastInputFile));
     }
 
@@ -168,8 +184,12 @@ public partial class MainWindowVM : ObservableRecipient, IDisposable
 
     #endregion Open
 
-    [RelayCommand]
-    public Task Save ()
+    #region Save
+
+    private bool CanSave => Classes.Count > 0;
+
+    [RelayCommand(CanExecute=nameof(CanSave))]
+    public Task Save()
     {
         if (OutputFilePath.IsNullOrEmpty()) //No path, try save as instead
             return SaveAs();
@@ -177,8 +197,8 @@ public partial class MainWindowVM : ObservableRecipient, IDisposable
         return Task.Run(() => SaveToFile(OutputFilePath));
     }
 
-    [RelayCommand]
-    public Task SaveAs ()
+    [RelayCommand(CanExecute=nameof(CanSave))]
+    public Task SaveAs()
     {
         return Task.Run(() =>
         {
@@ -197,7 +217,7 @@ public partial class MainWindowVM : ObservableRecipient, IDisposable
                 fileDialog.InitialDirectory = Settings.Default.OutputDirectory;
 
             bool? result = fileDialog.ShowDialog();
-            if (!result.HasValue || !result.Value) //Invalid selection
+            if (result != true) //User cancelled
                 return;
 
             OutputFilePath = fileDialog.FileName;
@@ -211,9 +231,12 @@ public partial class MainWindowVM : ObservableRecipient, IDisposable
 
     private void SaveToFile(string filePath)
     {
+        if (!CanSave)
+            return;
+
+        ClassModel[] classes = Classes.ToArray();
         Status = new TextStatus($"Saving to the database file {filePath}");
         DBUtils.CreateDB(filePath);
-        ClassModel[] classes = Classes.ToArray();
         bool success = DBUtils.TrySaveToFile(filePath, classes);
         if (success)
             Status = TextStatus.Success($"Saved {classes.Length} classes to the database file: {filePath}");
@@ -221,11 +244,7 @@ public partial class MainWindowVM : ObservableRecipient, IDisposable
             Status = TextStatus.Error($"Error saving to the database file: {filePath}. See log for details.");
     }
 
-    #endregion Public Methods
+    #endregion Save
 
-    #region Private Methods
-
-    // Private Methods
-
-    #endregion Private Methods
+    #endregion Commands
 }

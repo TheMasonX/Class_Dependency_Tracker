@@ -30,41 +30,4 @@ public partial class ClassControl : UserControl
     {
         InitializeComponent();
     }
-
-    #region Dependency Properties
-
-    public IRelayCommand<ClassModel> DeleteCommand
-    {
-        get { return (IRelayCommand<ClassModel>)GetValue(DeleteCommandProperty); }
-        set { SetValue(DeleteCommandProperty, value); }
-    }
-
-    // Using a DependencyProperty as the backing store for DeleteCommand.  This enables animation, styling, binding, etc...
-    public static readonly DependencyProperty DeleteCommandProperty =
-        DependencyProperty.Register("DeleteCommand", typeof(IRelayCommand<ClassModel>), typeof(ClassControl), new PropertyMetadata(OnDeleteCommandPropertyChanged));
-
-    public static void OnDeleteCommandPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-    {
-        if (d is not ClassControl uc)
-        {
-            Trace.WriteLine($"Couldn't get UserControl ClassControl from type {d.GetType()}");
-            return;
-        }
-
-        if (uc.DataContext is not ClassModel vm)
-        {
-            Trace.WriteLine($"Couldn't get ViewModel ClassControlVM for UserControl {uc}");
-            return;
-        }
-
-        if (e.NewValue is not IRelayCommand<ClassModel> command)
-        {
-            Trace.WriteLine($"Couldn't get DeleteCommand for UserControl {uc}. NewValue is {e.NewValue}.");
-            return;
-        }
-
-        vm.DeleteCommand = new RelayCommand(() => command.Execute(vm));
-    }
-
-    #endregion Dependency Properties
 }

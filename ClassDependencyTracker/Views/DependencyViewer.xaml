@@ -15,28 +15,23 @@
     </UserControl.Resources>
 
     <!--MainGrid-->
-    <Grid>
-        <ListView ItemsSource="{Binding DependencyLevels}">
+    <Grid x:Name="mainDependencyViewerGrid">
+        <ListView x:Name="levelsList" ItemsSource="{Binding LevelsView}" d:ItemsSource="{d:SampleData ItemCount=5}">
             <ListView.ItemTemplate>
                 <DataTemplate DataType="{x:Type models:DependencyLevel}">
-                    <!--ListView Container-->
-                    <Border Visibility="{Binding Visible, Converter={StaticResource boolToVis}}" d:Visibility="Visible">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="1*"/>
-                            </Grid.RowDefinitions>
-                            <Expander Header="{Binding Label}">
-                                <ListView Grid.Row="1" ItemsSource="{Binding Classes}">
-                                    <ListView.ItemTemplate>
-                                        <DataTemplate DataType="{x:Type models:ClassModel}">
-                                            <local:ClassControl DataContext="{Binding}" HorizontalAlignment="Stretch" DeleteCommand="{Binding Data, Source={StaticResource deleteCommand}}"/>
-                                        </DataTemplate>
-                                    </ListView.ItemTemplate>
-                                </ListView>
-                            </Expander>
-                        </Grid>
-                    </Border>
+
+                    <!--#region Dependency Level-->
+                    <Expander x:Name="levelExpanderContainer" Header="{Binding Label}" Background="{Binding Background}">
+                        <ListView Grid.Row="0" ItemsSource="{Binding Classes}" d:ItemsSource="{d:SampleData ItemCount=2}" Background="Transparent" BorderBrush="Transparent">
+                            <ListView.ItemTemplate>
+                                <DataTemplate DataType="{x:Type models:ClassModel}">
+                                    <local:ClassControl DataContext="{Binding}" HorizontalAlignment="Stretch"/>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </Expander>
+                    <!--#endregion Dependency Level-->
+                    
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>

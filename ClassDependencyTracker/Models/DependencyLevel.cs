@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Windows.Media;
 
 using ClassDependencyTracker.Utils.Extensions;
 
@@ -8,15 +9,24 @@ namespace ClassDependencyTracker.Models;
 
 public partial class DependencyLevel : ObservableObject
 {
+    //https://learn.microsoft.com/en-us/dotnet/api/system.windows.media.colors?view=windowsdesktop-9.0
+    public static Brush[] Backgrounds =
+    [
+        Brushes.Snow,
+        Brushes.WhiteSmoke,
+    ];
+
     public DependencyLevel(int level)
     {
         Level = level;
-        Name = $"Level {level}";
+        Name = $"Level {level + 1}";
         Label = Name;
+        Background = Backgrounds[Level % Backgrounds.Length];
     }
 
     public int Level { get; }
     public string Name { get; }
+    public Brush Background { get; }
 
     [ObservableProperty]
     private string _label;

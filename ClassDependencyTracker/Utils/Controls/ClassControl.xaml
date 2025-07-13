@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:ClassDependencyTracker.Views"
              xmlns:models="clr-namespace:ClassDependencyTracker.Models" xmlns:classes="clr-namespace:ClassDependencyTracker.Utils.Classes" xmlns:controls="clr-namespace:ClassDependencyTracker.Utils.Controls" xmlns:converters="clr-namespace:ClassDependencyTracker.Utils.Converters"
              mc:Ignorable="d" 
-             d:DesignHeight="200" d:DesignWidth="300">
+             d:DesignHeight="250" d:DesignWidth="300">
     <d:UserControl.DataContext>
         <models:ClassModel/>
     </d:UserControl.DataContext>
@@ -14,99 +14,96 @@
         <converters:BoolToGridLengthConverter x:Key="boolToGridLength" True="Auto" False="0"/>
         <converters:BoolToStringConverter x:Key="boolToShowHide" True="Hide details" False="Show details"/>
     </UserControl.Resources>
-    
-    <Border Background="WhiteSmoke" HorizontalAlignment="Stretch">
-        <Grid Margin="2">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="{Binding IsExpanded, Converter={StaticResource boolToGridLength}}" d:Height="Auto"/>
-                <RowDefinition Height="{Binding IsExpanded, Converter={StaticResource boolToGridLength}}" d:Height="Auto"/>
-                <RowDefinition Height="{Binding IsExpanded, Converter={StaticResource boolToGridLength}}" d:Height="Auto"/>
-                <RowDefinition Height="{Binding IsExpanded, Converter={StaticResource boolToGridLength}}" d:Height="Auto"/>
-                <RowDefinition Height="{Binding IsExpanded, Converter={StaticResource boolToGridLength}}" d:Height="Auto"/>
-                <RowDefinition Height="{Binding IsExpanded, Converter={StaticResource boolToGridLength}}" d:Height="Auto"/>
-                <RowDefinition Height="{Binding IsExpanded, Converter={StaticResource boolToGridLength}}" d:Height="Auto"/>
-            </Grid.RowDefinitions>
 
+    <Grid Margin="2" Background="LightGray" HorizontalAlignment="Stretch">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="{Binding IsExpanded, Converter={StaticResource boolToGridLength}}" d:Height="Auto"/>
+            <RowDefinition Height="{Binding IsExpanded, Converter={StaticResource boolToGridLength}}" d:Height="Auto"/>
+            <RowDefinition Height="{Binding IsExpanded, Converter={StaticResource boolToGridLength}}" d:Height="Auto"/>
+            <RowDefinition Height="{Binding IsExpanded, Converter={StaticResource boolToGridLength}}" d:Height="Auto"/>
+            <RowDefinition Height="{Binding IsExpanded, Converter={StaticResource boolToGridLength}}" d:Height="Auto"/>
+            <RowDefinition Height="{Binding IsExpanded, Converter={StaticResource boolToGridLength}}" d:Height="Auto"/>
+            <RowDefinition Height="{Binding IsExpanded, Converter={StaticResource boolToGridLength}}" d:Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="3*"/>
+        </Grid.ColumnDefinitions>
+
+        <Expander Grid.Row="1" Grid.ColumnSpan="2" Header="{Binding IsExpanded, Converter={StaticResource boolToShowHide}}" IsExpanded="{Binding IsExpanded}"/>
+
+        <!--Name-->
+        <Label Grid.Row="0" Grid.Column="0" Content="_Name:"/>
+        <Grid Grid.Row="0" Grid.Column="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>
+            <Button Grid.Column="1" Content="{StaticResource X}" ToolTip="Delete this class" Style="{StaticResource singleCharButton}" Command="{Binding DeleteClassCommand}"/>
+        </Grid>
+
+        <!--URL-->
+        <Label Grid.Row="2" Grid.Column="0" Content="_URL:"/>
+        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding URL, UpdateSourceTrigger=PropertyChanged}"/>
+
+        <!--Credits-->
+        <Label Grid.Row="3" Grid.Column="0" Content="_Credits:"/>
+        <controls:NumericBox Grid.Row="3" Grid.Column="1" Text="{Binding Credits, UpdateSourceTrigger=PropertyChanged}" IsFloat="False" MaxLength="1" HorizontalAlignment="Left" HorizontalContentAlignment="Center"/>
+
+        <!-- Semester -->
+        <Label Grid.Row="4" Grid.Column="0" Content="_Offered:"/>
+        <Grid Grid.Row="4" Grid.Column="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <Expander Grid.Row="1" Grid.ColumnSpan="2" Header="{Binding IsExpanded, Converter={StaticResource boolToShowHide}}" IsExpanded="{Binding IsExpanded}"/>
-            
-            <!--Name-->
-            <Label Grid.Row="0" Grid.Column="0" Content="_Name:"/>
-            <Grid Grid.Row="0" Grid.Column="1">
+            <CheckBox Grid.Column="0" Content="_Fall" IsChecked="{Binding Fall}"/>
+            <CheckBox Grid.Column="1" Content="S_pring" IsChecked="{Binding Spring}"/>
+            <CheckBox Grid.Column="2" Content="S_ummer" IsChecked="{Binding Summer}"/>
+        </Grid>
+
+        <!--#region Prereqs-->
+        <Grid Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" Name="prereqs">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="1*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <Grid Grid.Row="0" x:Name="prereqsHeader" Background="WhiteSmoke">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>
-                <Button Grid.Column="1" Content="{StaticResource X}" ToolTip="Delete this class" Style="{StaticResource singleCharButton}" Command="{Binding DeleteCommand}"/>
+
+                <Label Grid.Column="0" Content="_Prereqs:"/>
+                <Button Grid.Column="1" Content="{StaticResource +}" ToolTip="Add a prerequesite" Command="{Binding AddRequirementCommand}" IsEnabled="{Binding CanAdd}" Style="{StaticResource singleCharButton}"/>
             </Grid>
 
-            <!--URL-->
-            <Label Grid.Row="2" Grid.Column="0" Content="_URL:"/>
-            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding URL, UpdateSourceTrigger=PropertyChanged}"/>
+            <!-- Class List -->
+            <ListView Grid.Row="1" ItemsSource="{Binding Requirements}" Visibility="{Binding AnyRequirements, Converter={StaticResource boolToVis}}" d:Visibility="Visible" d:ItemsSource="{d:SampleData ItemCount=2}"
+                          Background="Transparent" BorderBrush="Transparent">
+                <ListView.ItemTemplate>
+                    <DataTemplate DataType="models:DependencyModel">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
 
-            <!--Credits-->
-            <Label Grid.Row="3" Grid.Column="0" Content="_Credits:"/>
-            <controls:NumericBox Grid.Row="3" Grid.Column="1" Text="{Binding Credits, UpdateSourceTrigger=PropertyChanged}" IsFloat="False" MaxLength="1" HorizontalAlignment="Left" HorizontalContentAlignment="Center"/>
-
-            <!-- Semester -->
-            <Label Grid.Row="4" Grid.Column="0" Content="_Offered:"/>
-            <Grid Grid.Row="4" Grid.Column="1">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-
-                <CheckBox Grid.Column="0" Content="S_pring" IsChecked="{Binding Spring}"/>
-                <CheckBox Grid.Column="1" Content="S_ummer" IsChecked="{Binding Summer}"/>
-                <CheckBox Grid.Column="2" Content="_Fall" IsChecked="{Binding Fall}"/>
-            </Grid>
-            
-            <!--Prereqs-->
-            <Grid Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" Name="prereqs">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="1*"/>
-                </Grid.RowDefinitions>
-
-                <!-- Header -->
-                <Grid Grid.Row="0" x:Name="prereqsHeader" Background="WhiteSmoke">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="1*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    
-                    <Label Grid.Column="0" Content="_Prereqs:"/>
-                    <Button Grid.Column="1" Content="{StaticResource +}" ToolTip="Add a prerequesite" Command="{Binding AddRequirementCommand}" IsEnabled="{Binding CanAdd}" Style="{StaticResource singleCharButton}"/>
-                </Grid>
-
-                <!-- Class List -->
-                <ListView Grid.Row="1" ItemsSource="{Binding Requirements}" Visibility="{Binding AnyRequirements, Converter={StaticResource boolToVis}}">
-                    <ListView.Resources>
-                        <classes:BindingProxy x:Key="deleteClassCommand" Data="{Binding DeleteRequirementCommand}"/>
-                    </ListView.Resources>
-                    <ListView.ItemTemplate>
-                        <DataTemplate DataType="models:DependencyModel">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="1*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-
-                                <ComboBox ItemsSource="{Binding NonSourceClasses}" SelectedItem="{Binding RequiredClass}" DisplayMemberPath="Name" d:ItemsSource="{d:SampleData ItemCount=2}" d:SelectedIndex="0"/>
-                                <Button x:Name="removePrereq" Grid.Column="1" Content="{StaticResource X}" Command="{Binding Data, Source={StaticResource deleteClassCommand}}" CommandParameter="{Binding}" Style="{StaticResource singleCharButton}"/>
-                            </Grid>
-                        </DataTemplate>
-                    </ListView.ItemTemplate>
-                </ListView>
-            </Grid>
+                            <ComboBox ItemsSource="{Binding NonSourceClasses}" SelectedItem="{Binding RequiredClass}" DisplayMemberPath="Name" d:ItemsSource="{d:SampleData ItemCount=2}" d:SelectedIndex="0"/>
+                            <Button x:Name="removePrereq" Grid.Column="1" Content="{StaticResource X}" Command="{Binding DeleteRequirementCommand}" CommandParameter="{Binding}" Style="{StaticResource singleCharButton}"/>
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
         </Grid>
-    </Border>
+        <!--#endregion Prereqs-->
+    </Grid>
 </UserControl>

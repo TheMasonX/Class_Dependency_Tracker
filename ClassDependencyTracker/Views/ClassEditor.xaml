@@ -11,10 +11,7 @@
     <UserControl.DataContext>
         <viewmodels:ClassEditorVM/>
     </UserControl.DataContext>
-    <UserControl.Resources>
-        <classes:BindingProxy x:Key="deleteCommand" Data="{Binding DeleteClassCommand}"/>
-    </UserControl.Resources>
-    
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -60,7 +57,7 @@
         <ListView Grid.Row="1" ItemsSource="{Binding ClassesView}" d:ItemsSource="{d:SampleData ItemCount=2}">
             <ListView.ItemTemplate>
                 <DataTemplate DataType="{x:Type models:ClassModel}">
-                    <local:ClassControl DataContext="{Binding}" HorizontalAlignment="Stretch" DeleteCommand="{Binding Data, Source={StaticResource deleteCommand}}"/>
+                    <local:ClassControl DataContext="{Binding}" HorizontalAlignment="Stretch"/>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>

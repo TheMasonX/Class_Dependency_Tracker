@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
+﻿using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
+using System.Windows.Data;
 
-using Microsoft.VisualBasic;
-
-using Serilog;
 
 namespace ClassDependencyTracker.Utils.Extensions;
 
@@ -17,6 +12,13 @@ public static class DispatcherUtils
     {
         ObservableCollection<T> result = null!;
         SafeInvoke(() => result = new ObservableCollection<T>(collection ?? []), invokeIfNoDispatcher);
+        return result;
+    }
+
+    public static ListCollectionView CreateListCollectionView<T>(this ObservableCollection<T> collection, Predicate<object> filter, bool invokeIfNoDispatcher = true)
+    {
+        ListCollectionView result = null!;
+        SafeInvoke(() => result = new ListCollectionView(collection) { Filter = filter }, invokeIfNoDispatcher);
         return result;
     }
 
@@ -53,4 +55,7 @@ public static class DispatcherUtils
     public static bool SafeAdd<T>(this ObservableCollection<T> collection, T model) =>  SafeInvoke(() => collection.Add(model));
     public static bool SafeRemove<T>(this ObservableCollection<T> collection, T model) =>  SafeInvoke(() => collection.Remove(model));
     public static bool SafeClear<T>(this ObservableCollection<T> collection) =>  SafeInvoke(collection.Clear);
+
+
+    public static void SafeRefresh(this ListCollectionView view) =>  view.Dispatcher?.Invoke(view.Refresh);
 }

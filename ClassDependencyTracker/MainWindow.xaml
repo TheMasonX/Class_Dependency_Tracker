@@ -16,7 +16,7 @@
         mc:Ignorable="d"
         x:Name="mainWindow"
         Title="Class Dependency Tracker"
-        Height="750" Width="1000">
+        Height="800" Width="1200">
     <Window.DataContext>
         <viewmodels:MainWindowVM/>
     </Window.DataContext>
@@ -111,9 +111,9 @@
         <!--#region    ============== Body ============== -->
         <Grid Grid.Row="1" x:Name="body">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="45*"/>
                 <ColumnDefinition Width="5"/>
-                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="55*"/>
             </Grid.ColumnDefinitions>
 
             <views:ClassEditor Grid.Column="0" x:Name="classes"/>

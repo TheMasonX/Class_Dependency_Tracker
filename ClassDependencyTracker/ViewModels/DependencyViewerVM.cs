@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Windows.Data;
 
 using ClassDependencyTracker.Messages;
 using ClassDependencyTracker.Models;
@@ -14,7 +15,10 @@ public partial class DependencyViewerVM : ObservableRecipient, IDisposable
 {
     public DependencyViewerVM()
     {
-        DependencyLevels = DispatcherUtils.CreateObservableCollection(Enumerable.Range(0, 10).Select(x => new DependencyLevel(x)));
+        IEnumerable<DependencyLevel> seedLevels = Enumerable.Range(0, 10).Select(x => new DependencyLevel(x));
+        Levels = DispatcherUtils.CreateObservableCollection(seedLevels);
+        LevelsView = Levels.CreateListCollectionView(FilterLevels);
+
         Messenger.Register<ClassesUpdatedMsg>(this, OnClassedUpdated);
     }
 
@@ -31,9 +35,20 @@ public partial class DependencyViewerVM : ObservableRecipient, IDisposable
     public ObservableCollection<ClassModel> Classes => MainWindowVM.Instance.Classes;
 
     [ObservableProperty]
-    private ObservableCollection<DependencyLevel> _dependencyLevels = null!;
+    private ObservableCollection<DependencyLevel> _levels = null!;
+
+    [ObservableProperty]
+    private ListCollectionView _levelsView = null!;
 
     #endregion Properties
+
+    private bool FilterLevels(object obj)
+    {
+        if (obj is not DependencyLevel level) //Impossible not to pass, but it's bookkeeping
+            return false;
+
+        return level.Classes.Count > 0;
+    }
 
     private void OnClassedUpdated(object recipient, ClassesUpdatedMsg message)
     {
@@ -42,7 +57,7 @@ public partial class DependencyViewerVM : ObservableRecipient, IDisposable
 
     public void Refresh()
     {
-        foreach (DependencyLevel level in DependencyLevels)
+        foreach (DependencyLevel level in Levels)
         {
             level.Classes.SafeClear();
         }
@@ -50,16 +65,17 @@ public partial class DependencyViewerVM : ObservableRecipient, IDisposable
         foreach (ClassModel classModel in Classes)
         {
             int depth = classModel.Depth;
-            for (int i = DependencyLevels.Count; i < depth; i++)
+            for (int i = Levels.Count; i < depth; i++)
             {
-                DependencyLevels.SafeAdd(new DependencyLevel(i));
+                Levels.SafeAdd(new DependencyLevel(i));
             }
-            DependencyLevels.ElementAt(depth).Classes.SafeAdd(classModel);
+            Levels.ElementAt(depth).Classes.SafeAdd(classModel);
         }
 
-        foreach (DependencyLevel level in DependencyLevels)
+        foreach (DependencyLevel level in Levels)
         {
             level.Refresh();
         }
+        LevelsView.SafeRefresh();
     }
 }

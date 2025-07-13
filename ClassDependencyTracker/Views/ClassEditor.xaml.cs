@@ -29,41 +29,4 @@ public partial class ClassEditor : UserControl
     {
         InitializeComponent();
     }
-
-    #region Dependency Properties
-
-    //public ObservableCollection<ClassModel> Classes
-    //{
-    //    get { return (ObservableCollection<ClassModel>)GetValue(ClassesProperty); }
-    //    set { SetValue(ClassesProperty, value); }
-    //}
-
-    //// Using a DependencyProperty as the backing store for Classes.  This enables animation, styling, binding, etc...
-    //public static readonly DependencyProperty ClassesProperty =
-    //    DependencyProperty.Register("Classes", typeof(ObservableCollection<ClassModel>), typeof(ClassEditor), new PropertyMetadata(OnClassesPropertyChanged));
-
-    //public static void OnClassesPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-    //{
-    //    if (d is not ClassEditor uc)
-    //    {
-    //        Trace.WriteLine($"Couldn't get UserControl ClassEditor from type {d.GetType()}");
-    //        return;
-    //    }
-
-    //    if (uc.DataContext is not ClassEditorVM vm)
-    //    {
-    //        Trace.WriteLine($"Couldn't get ViewModel ClassEditorVM for UserControl {uc}");
-    //        return;
-    //    }
-
-    //    if (e.NewValue is not ObservableCollection<ClassModel> classes)
-    //    {
-    //        Trace.WriteLine($"Couldn't get Classes for UserControl {uc}. NewValue is {e.NewValue}.");
-    //        return;
-    //    }
-
-    //    vm.Classes = classes;
-    //}
-
-    #endregion Dependency Properties
 }

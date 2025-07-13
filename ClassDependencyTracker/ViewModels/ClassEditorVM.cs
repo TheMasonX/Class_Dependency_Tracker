@@ -17,17 +17,14 @@ public partial class ClassEditorVM : ObservableRecipient
 {
     public ClassEditorVM()
     {
-        Classes = MainWindowVM.Instance.Classes;
-        ClassesView = new ListCollectionView(Classes) { Filter = FilterClasses };
+        ClassesView = Classes.CreateListCollectionView(FilterClasses);
     }
 
     #region Properties
 
     public IRelayCommand AddClassCommand => MainWindowVM.Instance.AddClassCommand;
-    public IRelayCommand<ClassModel> DeleteClassCommand => MainWindowVM.Instance.DeleteClassCommand;
 
-    [ObservableProperty]
-    private ObservableCollection<ClassModel> _classes = null!;
+    public ObservableCollection<ClassModel> Classes => MainWindowVM.Instance.Classes;
 
     [ObservableProperty]
     private ListCollectionView _classesView = null!;
@@ -80,7 +77,7 @@ public partial class ClassEditorVM : ObservableRecipient
 
     private void RefreshSearch()
     {
-        ClassesView.Dispatcher.Invoke(ClassesView.Refresh);
+        ClassesView.SafeRefresh();
     }
 
     private bool FilterClasses(object obj)

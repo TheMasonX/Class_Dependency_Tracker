@@ -104,7 +104,7 @@ public partial class ClassModel : ObservableRecipient, IDisposable
     private bool _isValid;
 
     [ObservableProperty]
-    private bool _isExpanded = true;
+    private bool _isExpanded = false;
 
     private int _depth = 0;
     public int Depth
@@ -129,8 +129,8 @@ public partial class ClassModel : ObservableRecipient, IDisposable
 
     #region Commands
 
-    [ObservableProperty]
-    private ICommand? _deleteCommand;
+    private ICommand? _deleteClassCommand;
+    public ICommand DeleteClassCommand => _deleteClassCommand ??= new RelayCommand(() => MainWindowVM.Instance.DeleteClassCommand.Execute(this));
 
     [RelayCommand]
     public void AddRequirement()
@@ -152,19 +152,6 @@ public partial class ClassModel : ObservableRecipient, IDisposable
         Requirements.Add(dep);
         Refresh();
         Messenger.Send(new ClassesUpdatedMsg(UpdateType.None, UpdateType.Added));
-    }
-
-    [RelayCommand]
-    public void DeleteRequirement(DependencyModel classModel)
-    {
-        string requiredName = classModel.RequiredClass.Name;
-        string title = $"Delete Requirement for {requiredName}?";
-        string message = $"Do you wish to delete the requirement for class {requiredName}?";
-        bool result = DialogUtils.ConfirmationDialog(title, message);
-        if (!result) //User cancelled
-            return;
-
-        DeleteRequirementSilent(classModel);
     }
 
     public void DeleteRequirementSilent(DependencyModel classModel)
